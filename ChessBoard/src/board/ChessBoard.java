@@ -24,7 +24,7 @@ public class ChessBoard extends JPanel {
     private Image wPawn,wKnight,wBishop,wRook,wQueen,wKing,
                   bPawn,bKnight,bBishop,bRook,bQueen,bKing;
 
-    private static Piece[][] board = new Piece[8][8];
+    private static Piece[][] board = new Piece[8][8]; //[row][col]
 
     public static final List<Character> COLUMN_LETTERS = List.of('a','b','c','d','e','f','g','h');
 
@@ -43,22 +43,15 @@ public class ChessBoard extends JPanel {
     }
 
     private Image getPieceImage(Piece piece){
-        if (piece == null) return null;
+        return switch (piece) {
+            case Pawn pawn -> piece.getIdentification().isWhite() ? wPawn : bPawn;
+            case Knight knight -> piece.getIdentification().isWhite() ? wKnight : bKnight;
+            case Bishop bishop -> piece.getIdentification().isWhite() ? wBishop : bBishop;
+            case Rook rook -> piece.getIdentification().isWhite() ? wRook : bRook;
+            case Queen queen -> piece.getIdentification().isWhite() ? wPawn : bPawn;
+            case null, default -> null;
+        };
 
-        if (piece instanceof Knight){
-            return piece.getIdentification().isWhite() ? wKnight : bKnight;
-        }
-        if (piece instanceof Bishop){
-            return piece.getIdentification().isWhite() ? wBishop : bBishop;
-        }
-        if (piece instanceof Rook){
-            return piece.getIdentification().isWhite() ? wRook : bRook;
-        }
-        if (piece instanceof Queen){
-            return piece.getIdentification().isWhite() ? wPawn : bPawn;
-        }
-
-        return null;
     }
 
     public void loadPieces(){
@@ -155,6 +148,7 @@ public class ChessBoard extends JPanel {
         // rotate around board center
         g2d.rotate(angle, boardSize / 2.0, boardSize / 2.0);
 
+        //draw the chess board squares
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
 
@@ -166,9 +160,16 @@ public class ChessBoard extends JPanel {
                 if (row + col == 0)
                     g2d.setColor(Color.RED);
 
-
                 g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
+        }
+
+        //draw the pieces
+        for (int row = 0; row <8; row++){
+            for (int col = 0; col<8; col++){
+                Piece piece = board[row][col];
+            }
+
         }
     }
 
@@ -179,7 +180,6 @@ public class ChessBoard extends JPanel {
 
         ChessBoard board = new ChessBoard();
         Knight k1 = new Knight('d',5,true);
-        //Knight k2 = new Knight('c',7,false);
         //insertPiece(2,7,PieceIdentification.B_KING);
 
         k1.moveCheck();
