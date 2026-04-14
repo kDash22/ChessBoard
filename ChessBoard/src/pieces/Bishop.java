@@ -26,14 +26,14 @@ public class Bishop extends Piece {
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
-        // A bishop can move a maximum of 13 squares (longest diagonal)
+        // up to 13 moves on the longest diagonal
         int[][] tempMoveSet = new int[14][2];
         boolean[] tempValidMoveSet = new boolean[14];
         int count = 0;
 
         // Directions: {row_change, col_change}
         // Top-Right, Top-Left, Bottom-Right, Bottom-Left
-        int[][] dirs = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+        int[][] dirs = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
 
         for (int[] dir : dirs) {
             int toRow = row + dir[0];
@@ -50,7 +50,7 @@ public class Bishop extends Piece {
                     // Check if it's an opponent piece
                     if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
                         if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
-                            refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
+                                refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                             check = true;
                             tempValidMoveSet[count] = false; // King check logic
                         } else {

@@ -26,13 +26,12 @@ public class Rook extends Piece {
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
-        // A rook can move a maximum of 14 squares (7 in each of its two dimensions)
+        // up to 14 straight moves
         int[][] tempMoveSet = new int[14][2];
         boolean[] tempValidMoveSet = new boolean[14];
         int count = 0;
 
-        // Directions: {row_change, col_change}
-        // Up, Down, Right, Left
+        // 4 straight directions
         int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
         for (int[] dir : dirs) {
@@ -47,20 +46,20 @@ public class Rook extends Piece {
                     tempValidMoveSet[count] = true;
                     count++;
                 } else {
-                    // Check if it's an opponent piece
+                    // hit an opponent piece
                     if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
                         if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
                             refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                             check = true;
-                            tempValidMoveSet[count] = false; // King check logic as used in Knight
+                            tempValidMoveSet[count] = false; // special check case
                         } else {
                             tempValidMoveSet[count] = true;
                         }
                     } else {
-                        tempValidMoveSet[count] = false; // Blocked by own piece
+                        tempValidMoveSet[count] = false; // blocked by our piece
                     }
                     count++;
-                    break; // Blocked from going further in this direction
+                    break; // stop sliding this way
                 }
 
                 toRow += dir[0];
@@ -68,7 +67,7 @@ public class Rook extends Piece {
             }
         }
 
-        // Initialize and correctly size the moveSet and validMoveSet arrays
+        // trim arrays to exactly what we found
         moveSet = new int[count][2];
         validMoveSet = new boolean[count];
 
