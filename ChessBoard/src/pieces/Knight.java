@@ -3,29 +3,28 @@ package pieces;
 import Global.Global;
 import board.ChessBoard;
 
-import java.util.Arrays;
-
 public class Knight extends Piece{
 
     private boolean check = false; //not decided how to implement checking yet this is just a placeholder
 
-    public Knight(Character col, int row, boolean white){
+    public Knight(Character col, int chessRow, boolean white){
         setCol(col);
-        setRow(row);
+        setRow(chessRow);
 
         if (white){
             setIdentification(PieceIdentification.W_KNIGHT);
         } else {
             setIdentification(PieceIdentification.B_KNIGHT);
         }
-        ChessBoard.insertPiece(turnColToIndex(col), row, this);
+        ChessBoard.insertPiece(turnColToIndex(col), chessRow, this);
+
         validMoveSet = new boolean[8];
     }
 
     @Override
     public void moveCheck() {
         int col = turnColToIndex(getCol());
-        int row = getRow();
+        int row = Global.chessRowtoIndex(getChessRow());
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
