@@ -43,4 +43,8 @@ public class Global {
         }
         System.out.println();
     }
+
+    public static int chessRowtoIndex(int chessRow){
+        return 8-chessRow;
+    }
 }

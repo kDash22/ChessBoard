@@ -7,22 +7,22 @@ public class Rook extends Piece {
 
     private boolean check = false;
 
-    public Rook(Character col, int row, boolean white) {
+    public Rook(Character col, int chessRow, boolean white) {
         setCol(col);
-        setRow(row);
+        setRow(chessRow);
 
         if (white) {
             setIdentification(PieceIdentification.W_ROOK);
         } else {
             setIdentification(PieceIdentification.B_ROOK);
         }
-        ChessBoard.insertPiece(row, turnColToIndex(col),this);
+        ChessBoard.insertPiece(turnColToIndex(col), chessRow ,this);
     }
 
     @Override
     public void moveCheck() {
         int col = turnColToIndex(getCol());
-        int row = getRow();
+        int row = Global.chessRowtoIndex(getChessRow());
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
@@ -91,3 +91,4 @@ public class Rook extends Piece {
         return "Rook";
     }
 }
+

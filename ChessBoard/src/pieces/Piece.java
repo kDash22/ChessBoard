@@ -36,7 +36,7 @@ public abstract  class Piece {
         return col;
     }
 
-    public int getRow() {
+    public int getChessRow() {
         return row;
     }
 
@@ -57,6 +57,14 @@ public abstract  class Piece {
             case 'h' -> 7;
             default -> -1;
         };
+    }
+
+    public boolean[] getValidMoveSet() {
+        return validMoveSet;
+    }
+
+    public int[][] getMoveSet() {
+        return moveSet;
     }
 
     //checking the available moves
