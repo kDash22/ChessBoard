@@ -9,7 +9,6 @@ public class Knight extends Piece{
 
     private boolean check = false; //not decided how to implement checking yet this is just a placeholder
 
-
     public Knight(Character col, int row, boolean white){
         setCol(col);
         setRow(row);
@@ -20,6 +19,7 @@ public class Knight extends Piece{
             setIdentification(PieceIdentification.B_KNIGHT);
         }
         ChessBoard.insertPiece(turnColToIndex(col), row, this);
+        validMoveSet = new boolean[8];
     }
 
     @Override

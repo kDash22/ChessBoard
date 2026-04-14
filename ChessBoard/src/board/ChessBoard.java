@@ -1,25 +1,30 @@
 package board;
 
 import pieces.*;
-import pieces.PieceIdentification;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 
 
 public class ChessBoard extends JPanel {
 
+    private Graphics2D g2d;
 
+    private boolean rotating = false; //if board is rotating
     private final int TILE_SIZE = 80;
     private final static int pieceBarWidth = 240;
     private final static int pieceBarLength = 640;
+
+    private boolean flipped = false;
+
     private double angle = 0;
     private double targetAngle = 0;
+
     private Timer timer;
-    private int direction = 1;
 
     private Image wPawn,wKnight,wBishop,wRook,wQueen,wKing,
                   bPawn,bKnight,bBishop,bRook,bQueen,bKing;
@@ -42,13 +47,16 @@ public class ChessBoard extends JPanel {
         setBoard(board);
     }
 
+
+
     private Image getPieceImage(Piece piece){
         return switch (piece) {
             case Pawn pawn -> piece.getIdentification().isWhite() ? wPawn : bPawn;
             case Knight knight -> piece.getIdentification().isWhite() ? wKnight : bKnight;
             case Bishop bishop -> piece.getIdentification().isWhite() ? wBishop : bBishop;
             case Rook rook -> piece.getIdentification().isWhite() ? wRook : bRook;
-            case Queen queen -> piece.getIdentification().isWhite() ? wPawn : bPawn;
+            case Queen queen -> piece.getIdentification().isWhite() ? wQueen : bQueen;
+            case King king -> piece.getIdentification().isWhite() ? wKing : bKing;
             case null, default -> null;
         };
 
@@ -73,10 +81,25 @@ public class ChessBoard extends JPanel {
 
     }
 
+    public static Image flipPiece(Image piece) {
+        if (piece != null){
+            int w = piece.getWidth(null);
+            int h = piece.getHeight(null);
+
+            BufferedImage flipped = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = flipped.createGraphics();
+
+            g2d.drawImage(piece, w, h, -w, -h, null);
+            g2d.dispose();
+
+            return flipped;
+        }
+        return null;
+    }
+
     public ChessBoard() {
 
         loadPieces();
-
         setPreferredSize(new Dimension(8 * TILE_SIZE, 8 * TILE_SIZE));
 
         addMouseListener(new MouseAdapter() {
@@ -107,11 +130,14 @@ public class ChessBoard extends JPanel {
     // animation-based flip
     private void flipBoard() {
 
-        direction *= -1;
-        targetAngle = angle + direction * Math.PI;
-
-        if (timer != null && timer.isRunning())
+        if (rotating)
             return;
+
+        rotating = true; // rotation lock, blocks any new rotations
+
+        flipped = !flipped;
+
+        targetAngle = flipped ? Math.PI : 0.0;
 
         timer = new Timer(25, e -> {
 
@@ -120,6 +146,7 @@ public class ChessBoard extends JPanel {
             if (Math.abs(targetAngle - angle) < speed) {
                 angle = targetAngle;
                 timer.stop();
+                rotating = false; //returns rotation lock
             } else {
                 angle += Math.signum(targetAngle - angle) * speed;
             }
@@ -133,7 +160,7 @@ public class ChessBoard extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
+        g2d = (Graphics2D) g;
 
 
         int boardSize = 8 * TILE_SIZE;
@@ -164,12 +191,47 @@ public class ChessBoard extends JPanel {
             }
         }
 
+        if (!flipped){
         //draw the pieces
-        for (int row = 0; row <8; row++){
-            for (int col = 0; col<8; col++){
-                Piece piece = board[row][col];
-            }
+            for (int row = 0; row <8; row++){
+                for (int col = 0; col<8; col++){
+                    Piece piece = board[row][col];
+                    Image pieceIcon = getPieceImage(piece);
 
+                    if (pieceIcon != null){
+
+                        g2d.drawImage(
+                                pieceIcon,
+                                col * TILE_SIZE,
+                                row * TILE_SIZE,
+                                TILE_SIZE,
+                                TILE_SIZE,
+                                null
+                        );
+                    }
+                }
+
+            }
+        } else {
+            for (int row = 0; row <8; row++){
+                for (int col = 0; col<8; col++){
+                    Piece piece = board[row][col];
+                    Image flippedPiece = flipPiece(getPieceImage(piece));
+
+                    if (flippedPiece != null){
+
+                        g2d.drawImage(
+                                flippedPiece,
+                                col * TILE_SIZE,
+                                row * TILE_SIZE,
+                                TILE_SIZE,
+                                TILE_SIZE,
+                                null
+                        );
+                    }
+                }
+
+            }
         }
     }
 
@@ -180,9 +242,13 @@ public class ChessBoard extends JPanel {
 
         ChessBoard board = new ChessBoard();
         Knight k1 = new Knight('d',5,true);
+        Knight k2 = new Knight('d',4,false);
+        insertPiece(3,4,k1);
+        insertPiece(3,4,k2);
         //insertPiece(2,7,PieceIdentification.B_KING);
 
         k1.moveCheck();
+        k2.moveCheck();
 
         JPanel whiteBar = new JPanel(); // right bar
         whiteBar.setPreferredSize(new Dimension(pieceBarWidth, pieceBarLength));
