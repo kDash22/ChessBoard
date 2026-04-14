@@ -12,8 +12,6 @@ import java.util.List;
 
 public class ChessBoard extends JPanel {
 
-    private Graphics2D g2d;
-
     private boolean rotating = false; //if board is rotating
     private final int TILE_SIZE = 80;
     private final static int pieceBarWidth = 240;
@@ -41,9 +39,10 @@ public class ChessBoard extends JPanel {
         ChessBoard.board = board;
     }
 
-    public static void insertPiece(int col, int row, Piece piece){
+    public static void insertPiece(int chessCol, int chessRow, Piece piece){
+        int row = 8-chessRow;
         Piece[][] board = getBoard();
-        board[col][row] = piece;
+        board[row][chessCol] = piece;
         setBoard(board);
     }
 
@@ -160,7 +159,7 @@ public class ChessBoard extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g2d = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g;
 
 
         int boardSize = 8 * TILE_SIZE;
@@ -233,6 +232,47 @@ public class ChessBoard extends JPanel {
 
             }
         }
+        //highlightValidSquare(g2d, new Knight('d',5,true));
+        //highlightValidSquare(g2d, new Knight('d',4,false));
+        highlightValidSquare(g2d, new Rook('b',5,false));
+    }
+
+    private void highlightValidSquare(Graphics2D g2d,Piece piece){
+        /*moveSet = new int[][]{
+                {row + 2, col + 1}, {row + 2, col - 1},
+                {row - 2, col + 1}, {row - 2, col - 1},
+                {row + 1, col + 2}, {row + 1, col - 2},
+                {row - 1, col + 2}, {row - 1, col - 2}
+        };*/
+        piece.moveCheck();
+
+        for (int i = 0; i < piece.getMoveSet().length; i++){
+
+            if (piece.getValidMoveSet()[i]){
+                int row = piece.getMoveSet()[i][0];
+                int col = piece.getMoveSet()[i][1];
+
+                // bounds check
+                if (row < 0 || row >= 8 || col < 0 || col >= 8)
+                    continue;
+                if (board[row][col] != null){
+                    g2d.setColor(new Color(255, 0, 0, 60));
+                }
+                else {
+                    g2d.setColor(new Color(0, 255, 0, 60));
+                }
+
+                /*if ((row + col) % 2 == 0)
+                    g2d.setColor(Color.cyan);
+                else
+                    g2d.setColor(Color.blue);*/
+
+                g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+            }
+
+        }
+
     }
 
     public static void main(String[] args) {
@@ -241,14 +281,20 @@ public class ChessBoard extends JPanel {
         frame.setLayout(new BorderLayout());
 
         ChessBoard board = new ChessBoard();
-        Knight k1 = new Knight('d',5,true);
-        Knight k2 = new Knight('d',4,false);
-        insertPiece(3,4,k1);
-        insertPiece(3,4,k2);
-        //insertPiece(2,7,PieceIdentification.B_KING);
 
-        k1.moveCheck();
-        k2.moveCheck();
+        Knight k1 = new Knight('d',5,true);
+        //Knight k2 = new Knight('d',4,false);
+
+
+
+
+        Rook r1 = new Rook('b',5,false);
+        Rook r2 = new Rook('c',6,true);
+
+
+        System.out.println();
+        r1.moveCheck();
+        r2.moveCheck();
 
         JPanel whiteBar = new JPanel(); // right bar
         whiteBar.setPreferredSize(new Dimension(pieceBarWidth, pieceBarLength));
