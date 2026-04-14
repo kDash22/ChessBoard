@@ -16,7 +16,7 @@ public class Rook extends Piece {
         } else {
             setIdentification(PieceIdentification.B_ROOK);
         }
-        ChessBoard.insertPiece(turnColToIndex(col), row, this);
+        ChessBoard.insertPiece(row, turnColToIndex(col),this);
     }
 
     @Override
