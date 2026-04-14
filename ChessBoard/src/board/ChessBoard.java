@@ -1,6 +1,6 @@
 package board;
 
-import pieces.Knight;
+import pieces.*;
 import pieces.PieceIdentification;
 
 import javax.swing.*;
@@ -11,6 +11,7 @@ import java.util.List;
 
 
 public class ChessBoard extends JPanel {
+
 
     private final int TILE_SIZE = 80;
     private final static int pieceBarWidth = 240;
@@ -23,22 +24,41 @@ public class ChessBoard extends JPanel {
     private Image wPawn,wKnight,wBishop,wRook,wQueen,wKing,
                   bPawn,bKnight,bBishop,bRook,bQueen,bKing;
 
-    private static PieceIdentification[][] board = new PieceIdentification[8][8];
+    private static Piece[][] board = new Piece[8][8];
 
     public static final List<Character> COLUMN_LETTERS = List.of('a','b','c','d','e','f','g','h');
 
-    public static PieceIdentification[][] getBoard() {
+    public static Piece[][] getBoard() {
         return board;
     }
 
-    public static void setBoard(PieceIdentification[][] board) {
+    public static void setBoard(Piece[][] board) {
         ChessBoard.board = board;
     }
 
-    public static void insertPiece(int col, int row, PieceIdentification piece){
-        PieceIdentification[][] board = getBoard();
+    public static void insertPiece(int col, int row, Piece piece){
+        Piece[][] board = getBoard();
         board[col][row] = piece;
         setBoard(board);
+    }
+
+    private Image getPieceImage(Piece piece){
+        if (piece == null) return null;
+
+        if (piece instanceof Knight){
+            return piece.getIdentification().isWhite() ? wKnight : bKnight;
+        }
+        if (piece instanceof Bishop){
+            return piece.getIdentification().isWhite() ? wBishop : bBishop;
+        }
+        if (piece instanceof Rook){
+            return piece.getIdentification().isWhite() ? wRook : bRook;
+        }
+        if (piece instanceof Queen){
+            return piece.getIdentification().isWhite() ? wPawn : bPawn;
+        }
+
+        return null;
     }
 
     public void loadPieces(){
@@ -60,9 +80,10 @@ public class ChessBoard extends JPanel {
 
     }
 
-
-
     public ChessBoard() {
+
+        loadPieces();
+
         setPreferredSize(new Dimension(8 * TILE_SIZE, 8 * TILE_SIZE));
 
         addMouseListener(new MouseAdapter() {
@@ -159,7 +180,7 @@ public class ChessBoard extends JPanel {
         ChessBoard board = new ChessBoard();
         Knight k1 = new Knight('d',5,true);
         //Knight k2 = new Knight('c',7,false);
-        insertPiece(2,7,PieceIdentification.B_KING);
+        //insertPiece(2,7,PieceIdentification.B_KING);
 
         k1.moveCheck();
 

@@ -5,17 +5,13 @@ import board.ChessBoard;
 
 public abstract  class Piece {
 
-
-    private boolean isWhite;
-    private Character col;
-    private int row;
-    private PieceIdentification identification;
+    protected boolean[] validMoveSet; //array to hold the valid moves
+    protected int[][] moveSet; //all moves of a piece
+    private Character col; //column letter in the chessboard
+    private int row; //row digit in the chessboard
+    private PieceIdentification identification;//what piece it is and what team does it belong to
 
     //setters
-    public void setWhite(boolean white) {
-        this.isWhite = white;
-    }
-
     public void setCol(Character col) {
         if (ChessBoard.COLUMN_LETTERS.contains(col)){
             this.col = col;
@@ -31,6 +27,9 @@ public abstract  class Piece {
             throw new IllegalArgumentException(" ROW NUMBER CANNOT BE BIGGER THAN 8 OR SMALLER THAN 0 ! ");
         }
     }
+    public void setIdentification(PieceIdentification identification) {
+        this.identification = identification;
+    }
 
     //getters
     public Character getCol() {
@@ -41,14 +40,11 @@ public abstract  class Piece {
         return row;
     }
 
-    public boolean isWhite() {
-        return isWhite;
-    }
-
     public PieceIdentification getIdentification() {
         return identification;
     }
 
+    //a method used to convert column letter into int to be used in arrays
     public int turnColToIndex(Character x){
         return switch (x) {
             case 'a' -> 0;
@@ -62,11 +58,11 @@ public abstract  class Piece {
             default -> -1;
         };
     }
+
+    //checking the available moves
     public abstract void moveCheck();
 
     public abstract void movePiece();
 
-    public void setIdentification(PieceIdentification identification) {
-        this.identification = identification;
-    }
+
 }
