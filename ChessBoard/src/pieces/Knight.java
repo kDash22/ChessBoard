@@ -24,7 +24,7 @@ public class Knight extends Piece{
     @Override
     public void moveCheck() {
         int col = turnColToIndex(getCol());
-        int row = Global.chessRowtoIndex(getChessRow());
+        int row = Global.chessRowToIndex(getChessRow());
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
