@@ -7,22 +7,22 @@ public class Rook extends Piece {
 
     private boolean check = false;
 
-    public Rook(Character col, int chessRow, boolean white) {
-        setCol(col);
-        setRow(chessRow);
+    public Rook(Character chessCol, int chessRow, boolean white) {
+        setChessCol(chessCol);
+        setChessRow(chessRow);
 
         if (white) {
             setIdentification(PieceIdentification.W_ROOK);
         } else {
             setIdentification(PieceIdentification.B_ROOK);
         }
-        ChessBoard.insertPiece(turnColToIndex(col), chessRow ,this);
+        ChessBoard.insertPiece(chessCol, chessRow ,this);
     }
 
     @Override
     public void moveCheck() {
-        int col = turnColToIndex(getCol());
-        int row = Global.chessRowToIndex(getChessRow());
+        int col = chessColToIndex(getChessCol());
+        int row = Piece.chessRowToIndex(getChessRow());
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
@@ -33,11 +33,11 @@ public class Rook extends Piece {
 
         // Directions: {row_change, col_change}
         // Up, Down, Right, Left
-        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
-        for (int[] dir : dirs) {
-            int toRow = row + dir[0];
-            int toCol = col + dir[1];
+        for (int[] direction : directions) {
+            int toRow = row + direction[0];
+            int toCol = col + direction[1];
 
             while (toRow >= 0 && toRow < 8 && toCol >= 0 && toCol < 8) {
                 tempMoveSet[count][0] = toRow;
@@ -63,8 +63,8 @@ public class Rook extends Piece {
                     break; // Blocked from going further in this direction
                 }
 
-                toRow += dir[0];
-                toCol += dir[1];
+                toRow += direction[0];
+                toCol += direction[1];
             }
         }
 

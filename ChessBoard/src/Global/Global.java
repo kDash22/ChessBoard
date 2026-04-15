@@ -44,10 +44,4 @@ public class Global {
         System.out.println();
     }
 
-    public static int chessRowToIndex(int chessRow) {
-        if (chessRow < 1 || chessRow > 8) {
-            throw new IllegalArgumentException("chessRow must be between 1 and 8: " + chessRow);
-        }
-        return 8 - chessRow;
-    }
 }
