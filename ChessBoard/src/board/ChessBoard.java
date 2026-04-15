@@ -251,11 +251,14 @@ public class ChessBoard extends JPanel {
 
         piece.moveCheck();
 
-        for (int i = 0; i < piece.getMoveSet().length; i++) {
+        boolean[] validMoveSet = piece.getValidMoveSet();
+        int[][] moveSet = piece.getMoveSet();
 
-            if (piece.getValidMoveSet()[i]) {
-                int row = piece.getMoveSet()[i][0];
-                int col = piece.getMoveSet()[i][1];
+        for (int i = 0; i < moveSet.length; i++) {
+
+            if (validMoveSet[i]) {
+                int row = moveSet[i][0];
+                int col = moveSet[i][1];
 
                 // bounds check
                 if (row < 0 || row >= 8 || col < 0 || col >= 8)
@@ -345,7 +348,7 @@ public class ChessBoard extends JPanel {
 
             for (int i = 0; i < moveSet.length; i++){
 
-                if (!validMoveset[i]) continue;;
+                if (!validMoveset[i]) continue;
 
                 int r = moveSet[i][0];
                 int c = moveSet[i][1];
@@ -397,8 +400,19 @@ public class ChessBoard extends JPanel {
         int adjustedX = event.getX() - offsetX;
         int adjustedY = event.getY() - offsetY;
 
-        int screenCol = adjustedX / TILE_SIZE;
-        int screenRow = adjustedY / TILE_SIZE;
+        // Reject any mouse click that falls outside the visual board area.
+        // Without this, negative coordinates (or overflow past board size)
+        // can be incorrectly mapped to valid tiles due to integer division behavior.
+        if (adjustedX < 0 || adjustedY < 0 || adjustedX >= boardSize || adjustedY >= boardSize) {
+            return new int[]{-1, -1};
+        }
+
+        // Convert pixel coordinates to board indices.
+        // Math.floorDiv is used instead of normal division to ensure correct handling
+        // of negative values (it rounds toward negative infinity, not toward zero).
+        // This prevents misclassification of out-of-bounds clicks as tile (0,0).
+        int screenCol = Math.floorDiv(adjustedX, TILE_SIZE);
+        int screenRow = Math.floorDiv(adjustedY, TILE_SIZE);
 
         return new int[]{screenRow,screenCol};
 
