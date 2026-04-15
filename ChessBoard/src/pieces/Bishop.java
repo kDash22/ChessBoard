@@ -16,13 +16,13 @@ public class Bishop extends Piece {
         } else {
             setIdentification(PieceIdentification.B_BISHOP);
         }
-        ChessBoard.insertPiece(row, turnColToIndex(col), this);
+        ChessBoard.insertPiece(turnColToIndex(col), getChessRow(), this);
     }
 
     @Override
     public void moveCheck() {
         int col = turnColToIndex(getCol());
-        int row = getRow();
+        int row = getChessRow();
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
