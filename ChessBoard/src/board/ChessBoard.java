@@ -13,6 +13,8 @@ import java.util.List;
 
 public class ChessBoard extends JPanel {
 
+    private boolean immediateAction = false;//to check if the player has a special move in his immediate turn
+
     private boolean selection = false;
     private int selectedRow = -1; //to get the row of the selected piece
     private int selectedCol = -1; //to get the column of the selected piece
@@ -109,6 +111,7 @@ public class ChessBoard extends JPanel {
 
     public ChessBoard() {
 
+        makeNewBoard();
         loadPieces();
         setPreferredSize(new Dimension(8 * TILE_SIZE, 8 * TILE_SIZE));
 
@@ -251,11 +254,14 @@ public class ChessBoard extends JPanel {
 
         piece.moveCheck();
 
-        for (int i = 0; i < piece.getMoveSet().length; i++) {
+        boolean[] validMoveSet = piece.getValidMoveSet();
+        int[][] moveSet = piece.getMoveSet();
 
-            if (piece.getValidMoveSet()[i]) {
-                int row = piece.getMoveSet()[i][0];
-                int col = piece.getMoveSet()[i][1];
+        for (int i = 0; i < moveSet.length; i++) {
+
+            if (validMoveSet[i]) {
+                int row = moveSet[i][0];
+                int col = moveSet[i][1];
 
                 // bounds check
                 if (row < 0 || row >= 8 || col < 0 || col >= 8)
@@ -329,8 +335,6 @@ public class ChessBoard extends JPanel {
             int row = boardCoordinates[0];
             int col = boardCoordinates[1];
 
-
-
             if (col < 0 || col > 7 || row < 0 || row > 7  ){
                 return;
             }
@@ -345,16 +349,69 @@ public class ChessBoard extends JPanel {
 
             for (int i = 0; i < moveSet.length; i++){
 
-                if (!validMoveset[i]) continue;;
+                if (!validMoveset[i]) continue;
 
                 int r = moveSet[i][0];
                 int c = moveSet[i][1];
 
                 if (r == selectedToRow && c == selectedToCol){
 
-                    Piece target = refBoard[selectedToRow][selectedToCol];
+                    //en passant logic
+                    if (immediateAction){//the player must make the en passant on his immediate turn
 
-                    if (target != null) {
+                        int enPassantRow ; //the row en passant happens differs for white and black
+
+                        if (flipped){ //flipped = black's turn
+                           enPassantRow = 4;
+                        } else {
+                            enPassantRow = 3;
+                        }
+
+                        for (int j = 0; j<8 ; j++){ //checks the whole en passant row
+
+                            if (PieceIdentification.isPawn(refBoard[enPassantRow][j])){//if a piece in that row is a pawn
+                                Pawn p = (Pawn) refBoard[enPassantRow][j];
+
+                                if (p.getEnPassantAllowed()){//if en passant allowed for a pawn
+                                    p.revokeEnPassantAllowed();//revoked
+                                }
+
+                                p.releaseEnPassantDanger();//release the en passant danger from the endangered pawns
+                            }
+                        }
+                        immediateAction = false;//sets the special move check to false
+                    }
+
+                    Piece target = refBoard[selectedToRow][selectedToCol];//moves the piece
+
+                    //if en passant happens, the logic for capturing the piece
+                    if (PieceIdentification.isPawn(movingPiece)){
+                        for (int k = 4; k < 6; k++ ){//en passant moves are 4 and 5
+                            if (validMoveset[k]){
+
+                                if (selectedToRow== moveSet[k][0]
+                                        && selectedToCol == moveSet[k][1] ){//checking if the move was an en passant
+
+                                    Pawn enPassantCapturedPawn = (Pawn) refBoard[selectedRow][selectedCol] ; //selectedRow because the pawn that gets captured is in the row as the pawn that does the en passant
+
+                                    if (enPassantCapturedPawn.getIdentification().isWhite()){ //adding the captured pice
+                                        capturedByBlack.add(enPassantCapturedPawn);
+                                    } else {
+                                        capturedByWhite.add(enPassantCapturedPawn);
+                                    }
+
+                                    refBoard[selectedRow][selectedToCol] = null;//selectedRow because the pawn that gets captured is in the row as the pawn that does the en passant
+
+
+                                }
+
+                            }
+                        }
+                    }
+
+
+
+                    if (target != null) { //adding the captured pieces
                         if (target.getIdentification().isWhite()){
                             capturedByBlack.add(target);
                         } else {
@@ -362,18 +419,39 @@ public class ChessBoard extends JPanel {
                         }
                     }
 
-                    movingPiece.setChessCol(Piece.colToChessCol(selectedToCol));
-                    movingPiece.setChessRow(Piece.rowToChessRow(selectedToRow));
 
-                    refBoard[selectedToRow][selectedToCol] = movingPiece;
+
+                    movingPiece.setChessCol(Piece.colToChessCol(selectedToCol));//updates the piece column
+                    movingPiece.setChessRow(Piece.rowToChessRow(selectedToRow));//updates the piece row
+
+                    refBoard[selectedToRow][selectedToCol] = movingPiece;//updates the location of the moves piece
                     refBoard[selectedRow][selectedCol] = null;
 
-                    selectedRow = selectedCol = selectedToRow = selectedToCol = -1;
-                    selection = false;
+                    setBoard(refBoard);//updates the board array
 
-                    setBoard(refBoard);
-                    repaint();
-                    flipBoard();//flips board after a successfull move
+                    //if a pawn is getting promoted check
+                    if (PieceIdentification.isPawn(movingPiece)  ){
+                        Pawn p = (Pawn) movingPiece;
+                        p.promote();//automatically sets the board in the method
+
+                        //checks if a pawn can be in en passant danger
+                        if ((p.getIdentification().isWhite() && selectedToRow == selectedRow-2)
+                                || (p.getIdentification().isBlack() && selectedToRow == selectedRow+2)){
+
+                            boolean[] enPassantDanger = p.enPassantDangerCheck(); //checking if there is opponent pawns that can jump to the oppotunity
+                            if (enPassantDanger[0] || enPassantDanger[1]){
+                                immediateAction = true;//sets the special move check for next turn to be true
+                            }
+                        }
+                    }
+
+
+                    selectedRow = selectedCol = selectedToRow = selectedToCol = -1;//wipes the variables
+                    selection = false;//wipes the selection
+
+
+                    repaint();//board refresh
+                    flipBoard();//flips board after a successful move
                     break;
                 }
 
@@ -397,10 +475,68 @@ public class ChessBoard extends JPanel {
         int adjustedX = event.getX() - offsetX;
         int adjustedY = event.getY() - offsetY;
 
-        int screenCol = adjustedX / TILE_SIZE;
-        int screenRow = adjustedY / TILE_SIZE;
+        // Reject any mouse click that falls outside the visual board area.
+        // Without this, negative coordinates (or overflow past board size)
+        // can be incorrectly mapped to valid tiles due to integer division behavior.
+        if (adjustedX < 0 || adjustedY < 0 || adjustedX >= boardSize || adjustedY >= boardSize) {
+            return new int[]{-1, -1};
+        }
+
+        // Convert pixel coordinates to board indices.
+        // Math.floorDiv is used instead of normal division to ensure correct handling
+        // of negative values (it rounds toward negative infinity, not toward zero).
+        // This prevents misclassification of out-of-bounds clicks as tile (0,0).
+        int screenCol = Math.floorDiv(adjustedX, TILE_SIZE);
+        int screenRow = Math.floorDiv(adjustedY, TILE_SIZE);
 
         return new int[]{screenRow,screenCol};
+
+    }
+
+    // a method which makes a new board with all the pieces
+    public void makeNewBoard(){
+
+        Piece[][] emptyBoard = new Piece[8][8];
+        setBoard(emptyBoard);
+
+        //white pieces
+        Rook wR1 = new Rook('a',1,true);
+        Knight wN1 = new Knight('b',1,true);
+        Bishop wB1 = new Bishop('c',1,true);
+        Queen wQ  = new Queen('d',1,true);
+        King wK   = new King('e',1,true);
+        Bishop wB2 = new Bishop('f',1,true);
+        Knight wN2 = new Knight('g',1,true);
+        Rook wR2 = new Rook('h',1,true);
+
+        Pawn wP1 = new Pawn('a',2,true);
+        Pawn wP2 = new Pawn('b',2,true);
+        Pawn wP3 = new Pawn('c',2,true);
+        Pawn wP4 = new Pawn('d',2,true);
+        Pawn wP5 = new Pawn('e',2,true);
+        Pawn wP6 = new Pawn('f',2,true);
+        Pawn wP7 = new Pawn('g',2,true);
+        Pawn wP8 = new Pawn('h',2,true);
+
+        //black pieces
+        Rook bR1 = new Rook('a',8,false);
+        Knight bN1 = new Knight('b',8,false);
+        Bishop bB1 = new Bishop('c',8,false);
+        Queen bQ  = new Queen('d',8,false);
+        King bK   = new King('e',8,false);
+        Bishop bB2 = new Bishop('f',8,false);
+        Knight bN2 = new Knight('g',8,false);
+        Rook bR2 = new Rook('h',8,false);
+
+        Pawn bP1 = new Pawn('a',7,false);
+        Pawn bP2 = new Pawn('b',7,false);
+        Pawn bP3 = new Pawn('c',7,false);
+        Pawn bP4 = new Pawn('d',7,false);
+        Pawn bP5 = new Pawn('e',7,false);
+        Pawn bP6 = new Pawn('f',7,false);
+        Pawn bP7 = new Pawn('g',7,false);
+        Pawn bP8 = new Pawn('h',7,false);
+
 
     }
 
@@ -420,20 +556,29 @@ public class ChessBoard extends JPanel {
 
         ChessBoard board = new ChessBoard();
 
-        Knight k1 = new Knight('d', 5, true);
-        Knight k2 = new Knight('b',7,false);
-        Knight k3 = new Knight('d',2,false);
+        //Knight k1 = new Knight('d', 5, true);
+        //Knight k2 = new Knight('b',7,false);
+        //Knight k3 = new Knight('d',2,false);
+        //Knight k4 = new Knight('c',4,true);
 
-        Rook r1 = new Rook('b', 4, false);
-        Rook r2 = new Rook('c',7,true);
-        Rook r3 = new Rook('b',8,false);
+        //Rook r1 = new Rook('b', 4, false);
+        //Rook r2 = new Rook('c',7,true);
+        //Rook r3 = new Rook('b',8,false);
 
+        //Pawn p1 = new Pawn('c',2,true);
+        //Pawn p2 = new Pawn('d',7,false);
+        //Pawn p3 = new Pawn('f',7,true);
 
+        //King king1 = new King('e',1,true);
+        //King king2 = new King('d',8,false);
+/*
         System.out.println();
-        //r1.moveCheck();
-        //r2.moveCheck();
 
-        /*JPanel whiteBar = new JPanel(); // right bar
+
+        r1.moveCheck();
+        r2.moveCheck();
+
+        JPanel whiteBar = new JPanel(); // right bar
         whiteBar.setPreferredSize(new Dimension(pieceBarWidth, pieceBarLength));
         whiteBar.setBackground(Color.LIGHT_GRAY);
 
@@ -455,6 +600,7 @@ public class ChessBoard extends JPanel {
 
 
     }
+
 
 }
 

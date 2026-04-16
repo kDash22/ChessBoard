@@ -24,7 +24,7 @@ public abstract  class Piece {
         if (chessRow <= 8 && chessRow > 0){
             this.chessRow = chessRow;
         } else {
-            throw new IllegalArgumentException(" ROW NUMBER CANNOT BE BIGGER THAN 8 OR SMALLER THAN 0 ! : "+ chessRow);
+            throw new IllegalArgumentException(" ROW NUMBER MUST BE BETWEEN 1 AND 8 ! : "+ chessRow);
         }
     }
     public void setIdentification(PieceIdentification identification) {
@@ -47,7 +47,7 @@ public abstract  class Piece {
     //a method used to convert column letter into int to be used in arrays
     public static int chessColToIndex(Character chessCol){
         if (!ChessBoard.COLUMN_LETTERS.contains(chessCol)){
-           throw new IllegalArgumentException(" COLUMN LETTER NOT VALID ! ");
+           throw new IllegalArgumentException(" COLUMN LETTER NOT VALID ! : " + chessCol);
         }
         return switch (chessCol) {
             case 'a' -> 0;

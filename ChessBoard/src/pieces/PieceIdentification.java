@@ -22,4 +22,11 @@ public enum PieceIdentification {
     public boolean isBlack() {
         return !isWhite;
     }
+
+    public static boolean isPawn(Piece piece){
+        if (piece == null){
+            return false;
+        }
+        return piece.getIdentification() == W_PAWN || piece.getIdentification() == B_PAWN;
+    }
 }
