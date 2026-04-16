@@ -46,6 +46,7 @@ public class Rook extends Piece {
                 if (refBoard[toRow][toCol] == null) {
                     tempValidMoveSet[count] = true;
                     count++;
+
                 } else {
                     // hit an opponent piece
                     if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
