@@ -111,7 +111,7 @@ public class ChessBoard extends JPanel {
 
     public ChessBoard() {
 
-        makeNewBoard();
+       // makeNewBoard();
         loadPieces();
         setPreferredSize(new Dimension(8 * TILE_SIZE, 8 * TILE_SIZE));
 
@@ -496,6 +496,9 @@ public class ChessBoard extends JPanel {
     // a method which makes a new board with all the pieces
     public void makeNewBoard(){
 
+        Piece[][] emptyBoard = new Piece[8][8];
+        setBoard(emptyBoard);
+
         //white pieces
         Rook wR1 = new Rook('a',1,true);
         Knight wN1 = new Knight('b',1,true);
@@ -552,13 +555,13 @@ public class ChessBoard extends JPanel {
         frame.setLayout(new BorderLayout());
 
         ChessBoard board = new ChessBoard();
-/*
-        Knight k1 = new Knight('d', 5, true);
-        Knight k2 = new Knight('b',7,false);
-        Knight k3 = new Knight('d',2,false);
-        Knight k4 = new Knight('c',4,true);
 
-        Rook r1 = new Rook('b', 4, false);
+        //Knight k1 = new Knight('d', 5, true);
+        //Knight k2 = new Knight('b',7,false);
+        //Knight k3 = new Knight('d',2,false);
+        //Knight k4 = new Knight('c',4,true);
+
+        //Rook r1 = new Rook('b', 4, false);
         Rook r2 = new Rook('c',7,true);
         Rook r3 = new Rook('b',8,false);
 
@@ -566,9 +569,9 @@ public class ChessBoard extends JPanel {
         Pawn p2 = new Pawn('d',7,false);
         Pawn p3 = new Pawn('f',7,true);
 
-        King king1 = new King('e',1,true);
-        King king2 = new King('d',8,false);
-
+        //King king1 = new King('e',1,true);
+        //King king2 = new King('d',8,false);
+/*
         System.out.println();
 
 
