@@ -116,7 +116,7 @@ public class Pawn extends Piece{
         }
 
         //en passant to the left logic
-        if (col - 1 >= 0 && col - 1 < 8){ //toColumn must be valid
+        if ((col - 1) >= 0 && col - 1 < 8){ //toColumn must be valid
             if (PieceIdentification.isPawn(refBoard[row][col - 1])) {//only a pawn can be taken using en passant
 
                 Pawn p = (Pawn) refBoard[row][col - 1];
@@ -137,7 +137,7 @@ public class Pawn extends Piece{
                         moveSet[4][0] = row - 1; //white moves form 7 -> 0 so the row number reduces
                         moveSet[4][1] = chessColToIndex(p.getChessCol());// in en passant the piece moves to the same column as the opponent piece, same as capturing normally
                         validMoveSet[4] = true;
-                        System.out.println("can enpassant to " + rowToChessRow(moveSet[4][0]) + colToChessCol(moveSet[5][1]));
+                        System.out.println("can enpassant to " + rowToChessRow(moveSet[4][0]) + colToChessCol(moveSet[4][1]));
                         System.out.println("valid: " + validMoveSet[4]);
 
                     }
