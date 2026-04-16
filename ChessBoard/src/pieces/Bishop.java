@@ -63,8 +63,8 @@ public class Bishop extends Piece {
                     break; // Blocked from going further in this direction
                 }
 
-                toRow += dir[0];
-                toCol += dir[1];
+                toRow += direction[0];
+                toCol += direction[1];
             }
         }
 
