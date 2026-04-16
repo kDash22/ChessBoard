@@ -26,7 +26,7 @@ public class Queen extends Piece {
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
-        // A Queen can have up to 27 moves (14 straight + 13 diagonal)
+        // A Queen can have up to 27 moves (14 straight + 14 diagonal)
         int[][] tempMoveSet = new int[28][2];
         boolean[] tempValidMoveSet = new boolean[28];
         int count = 0;
