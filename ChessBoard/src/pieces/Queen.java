@@ -85,5 +85,11 @@ public class Queen extends Piece {
 
     @Override
     public void movePiece() {
+        // To be implemented
+    }
+
+    @Override
+    public String toString() {
+        return "Queen";
     }
 }
