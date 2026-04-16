@@ -7,22 +7,22 @@ public class Bishop extends Piece {
 
     private boolean check = false;
 
-    public Bishop(Character col, int row, boolean white) {
-        setCol(col);
-        setRow(row);
+    public Bishop(Character chessCol, int chessRow, boolean white) {
+        setChessCol(chessCol);
+        setChessRow(chessRow);
 
         if (white) {
             setIdentification(PieceIdentification.W_BISHOP);
         } else {
             setIdentification(PieceIdentification.B_BISHOP);
         }
-        ChessBoard.insertPiece(turnColToIndex(col), getChessRow(), this);
+        ChessBoard.insertPiece(chessCol, chessRow, this);
     }
 
     @Override
     public void moveCheck() {
-        int col = turnColToIndex(getCol());
-        int row = getChessRow();
+        int col = chessColToIndex(getChessCol());
+        int row = Piece.chessRowToIndex(getChessRow());
 
         Piece[][] refBoard = ChessBoard.getBoard();
 

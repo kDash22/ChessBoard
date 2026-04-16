@@ -6,11 +6,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
 
 
 public class ChessBoard extends JPanel {
+
+    private boolean selection = false;
+    private int selectedRow = -1; //to get the row of the selected piece
+    private int selectedCol = -1; //to get the column of the selected piece
+
+    private List<Piece> capturedByWhite = new ArrayList<>();
+    private List<Piece> capturedByBlack= new ArrayList<>();
+
+    private int selectedToRow = -1; //to get the row of the square that the piece is going to move to
+    private int selectedToCol = -1; //to get the column of the square that the piece is going to move to
 
     private boolean rotating = false; //if board is rotating
     private final int TILE_SIZE = 80;
@@ -24,12 +35,12 @@ public class ChessBoard extends JPanel {
 
     private Timer timer;
 
-    private Image wPawn,wKnight,wBishop,wRook,wQueen,wKing,
-                  bPawn,bKnight,bBishop,bRook,bQueen,bKing;
+    private Image wPawn, wKnight, wBishop, wRook, wQueen, wKing,
+            bPawn, bKnight, bBishop, bRook, bQueen, bKing;
 
     private static Piece[][] board = new Piece[8][8]; //[row][col]
 
-    public static final List<Character> COLUMN_LETTERS = List.of('a','b','c','d','e','f','g','h');
+    public static final List<Character> COLUMN_LETTERS = List.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
 
     public static Piece[][] getBoard() {
         return board;
@@ -39,16 +50,16 @@ public class ChessBoard extends JPanel {
         ChessBoard.board = board;
     }
 
-    public static void insertPiece(int chessCol, int chessRow, Piece piece){
-        int row = 8-chessRow;
+    public static void insertPiece(Character chessCol, int chessRow, Piece piece) {
+        int row = Piece.chessRowToIndex(chessRow);
+        int col = Piece.chessColToIndex(chessCol);
         Piece[][] board = getBoard();
-        board[row][chessCol] = piece;
+        board[row][col] = piece;
         setBoard(board);
     }
 
 
-
-    private Image getPieceImage(Piece piece){
+    private Image getPieceImage(Piece piece) {
         return switch (piece) {
             case Pawn pawn -> piece.getIdentification().isWhite() ? wPawn : bPawn;
             case Knight knight -> piece.getIdentification().isWhite() ? wKnight : bKnight;
@@ -61,7 +72,7 @@ public class ChessBoard extends JPanel {
 
     }
 
-    public void loadPieces(){
+    public void loadPieces() {
         //white
         wPawn = new ImageIcon("pieces/white/white-pawn.png").getImage();
         wKnight = new ImageIcon("pieces/white/white-knight.png").getImage();
@@ -81,7 +92,7 @@ public class ChessBoard extends JPanel {
     }
 
     public static Image flipPiece(Image piece) {
-        if (piece != null){
+        if (piece != null) {
             int w = piece.getWidth(null);
             int h = piece.getHeight(null);
 
@@ -105,23 +116,10 @@ public class ChessBoard extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
 
-                int col = 1 + (e.getX() / TILE_SIZE);
-                int row = 8 - (e.getY() / TILE_SIZE) ;
+                selectPiece(e);
+                movePiece(e);
 
-                // determine logical orientation
-                boolean isFlipped = ((int)(targetAngle / Math.PI)) % 2 != 0;
 
-                if (isFlipped) {
-                    col = 8 - col + 1;
-                    row = 1 + (e.getY() / TILE_SIZE);
-                }
-
-                Character column = COLUMN_LETTERS.get(col - 1);
-
-                System.out.println("Clicked: row=" + row + ", col=" + column);
-
-                // trigger animated flip
-                flipBoard();
             }
         });
     }
@@ -160,6 +158,7 @@ public class ChessBoard extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+        Piece[][] refBoard = getBoard();
 
 
         int boardSize = 8 * TILE_SIZE;
@@ -189,15 +188,24 @@ public class ChessBoard extends JPanel {
                 g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
+        if (selectedRow != -1 && selectedCol != -1) {
+            Piece selected = refBoard[selectedRow][selectedCol];
+            if (selected != null) {
+                highlightValidSquare(g2d, selected);
 
-        if (!flipped){
-        //draw the pieces
-            for (int row = 0; row <8; row++){
-                for (int col = 0; col<8; col++){
+                g2d.setColor(new Color(148,224,224,90));
+                g2d.fillRect(selectedCol * TILE_SIZE, selectedRow * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            }
+        }
+
+        if (!flipped) {
+            //draw the pieces
+            for (int row = 0; row < 8; row++) {
+                for (int col = 0; col < 8; col++) {
                     Piece piece = board[row][col];
                     Image pieceIcon = getPieceImage(piece);
 
-                    if (pieceIcon != null){
+                    if (pieceIcon != null) {
 
                         g2d.drawImage(
                                 pieceIcon,
@@ -212,12 +220,12 @@ public class ChessBoard extends JPanel {
 
             }
         } else {
-            for (int row = 0; row <8; row++){
-                for (int col = 0; col<8; col++){
+            for (int row = 0; row < 8; row++) {
+                for (int col = 0; col < 8; col++) {
                     Piece piece = board[row][col];
                     Image flippedPiece = flipPiece(getPieceImage(piece));
 
-                    if (flippedPiece != null){
+                    if (flippedPiece != null) {
 
                         g2d.drawImage(
                                 flippedPiece,
@@ -234,38 +242,29 @@ public class ChessBoard extends JPanel {
         }
         //highlightValidSquare(g2d, new Knight('d',5,true));
         //highlightValidSquare(g2d, new Knight('d',4,false));
-        highlightValidSquare(g2d, new Rook('b',5,false));
+        //highlightValidSquare(g2d, new Rook('b',5,false));
+        //highlightValidSquare(g2d,new Rook('c',7,true));
+
     }
 
-    private void highlightValidSquare(Graphics2D g2d,Piece piece){
-        /*moveSet = new int[][]{
-                {row + 2, col + 1}, {row + 2, col - 1},
-                {row - 2, col + 1}, {row - 2, col - 1},
-                {row + 1, col + 2}, {row + 1, col - 2},
-                {row - 1, col + 2}, {row - 1, col - 2}
-        };*/
+    private void highlightValidSquare(Graphics2D g2d, Piece piece) {
+
         piece.moveCheck();
 
-        for (int i = 0; i < piece.getMoveSet().length; i++){
+        for (int i = 0; i < piece.getMoveSet().length; i++) {
 
-            if (piece.getValidMoveSet()[i]){
+            if (piece.getValidMoveSet()[i]) {
                 int row = piece.getMoveSet()[i][0];
                 int col = piece.getMoveSet()[i][1];
 
                 // bounds check
                 if (row < 0 || row >= 8 || col < 0 || col >= 8)
                     continue;
-                if (board[row][col] != null){
+                if (board[row][col] != null) {
                     g2d.setColor(new Color(255, 0, 0, 60));
-                }
-                else {
+                } else {
                     g2d.setColor(new Color(0, 255, 0, 60));
                 }
-
-                /*if ((row + col) % 2 == 0)
-                    g2d.setColor(Color.cyan);
-                else
-                    g2d.setColor(Color.blue);*/
 
                 g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
@@ -275,28 +274,166 @@ public class ChessBoard extends JPanel {
 
     }
 
-    public static void main(String[] args) {
+    public void selectPiece(MouseEvent e) {
+
+        //to ensure the coordinate system works properly in case of a flip or a window resize
+        int[] screenCoordinates = getScreenTileCoordinates(e);
+
+        int[] boardCoordinates = toBoardCoordinates(screenCoordinates[0], screenCoordinates[1]);
+        int row = boardCoordinates[0];
+        int col = boardCoordinates[1];
+
+        if (col < 0 || col > 7 || row < 0 || row > 7  ){
+            return;
+        }
+
+        Piece[][] refBoard = getBoard();
+
+        //  If a piece is already selected and destination is empty, the movePiece handles the next click
+        if (selection && refBoard[row][col] == null) {
+            return;
+        }
+
+        if (refBoard[row][col] != null) {
+
+            if (refBoard[row][col].getIdentification().isWhite() && !flipped) {
+                selection = true;
+                selectedCol = col;
+                selectedRow = row;
+                repaint();
+            }
+
+            if (refBoard[row][col].getIdentification().isBlack() && flipped){
+                selection = true;
+                selectedCol = col;
+                selectedRow = row;
+                repaint();
+            }
+        } else {
+            selection = false;
+            selectedCol = -1;
+            selectedRow = -1;
+            repaint();
+        }
+
+
+    }
+
+    private void movePiece(MouseEvent e){
+
+        if (selection){
+            //to ensure the coordinate system works properly in case of a flip or a window resize
+            int[] screenCoordinates = getScreenTileCoordinates(e);
+
+            int[] boardCoordinates = toBoardCoordinates(screenCoordinates[0], screenCoordinates[1]);
+            int row = boardCoordinates[0];
+            int col = boardCoordinates[1];
+
+
+
+            if (col < 0 || col > 7 || row < 0 || row > 7  ){
+                return;
+            }
+            selectedToRow = row;
+            selectedToCol = col;
+
+            Piece[][] refBoard = getBoard();
+            Piece movingPiece = refBoard[selectedRow][selectedCol];
+            int[][] moveSet = movingPiece.getMoveSet();
+            boolean[] validMoveset = movingPiece.getValidMoveSet();
+
+
+            for (int i = 0; i < moveSet.length; i++){
+
+                if (!validMoveset[i]) continue;;
+
+                int r = moveSet[i][0];
+                int c = moveSet[i][1];
+
+                if (r == selectedToRow && c == selectedToCol){
+
+                    Piece target = refBoard[selectedToRow][selectedToCol];
+
+                    if (target != null) {
+                        if (target.getIdentification().isWhite()){
+                            capturedByBlack.add(target);
+                        } else {
+                            capturedByWhite.add(target);
+                        }
+                    }
+
+                    movingPiece.setChessCol(Piece.colToChessCol(selectedToCol));
+                    movingPiece.setChessRow(Piece.rowToChessRow(selectedToRow));
+
+                    refBoard[selectedToRow][selectedToCol] = movingPiece;
+                    refBoard[selectedRow][selectedCol] = null;
+
+                    selectedRow = selectedCol = selectedToRow = selectedToCol = -1;
+                    selection = false;
+
+                    setBoard(refBoard);
+                    repaint();
+                    flipBoard();//flips board after a successfull move
+                    break;
+                }
+
+            }
+
+
+
+
+
+        }
+
+    }
+
+    private int[] getScreenTileCoordinates(MouseEvent event){
+        //this ensures the coordinate system works in case of a window resize
+        int boardSize = 8 * TILE_SIZE;
+
+        int offsetX = (getWidth() - boardSize) / 2;
+        int offsetY = (getHeight() - boardSize) / 2;
+
+        int adjustedX = event.getX() - offsetX;
+        int adjustedY = event.getY() - offsetY;
+
+        int screenCol = adjustedX / TILE_SIZE;
+        int screenRow = adjustedY / TILE_SIZE;
+
+        return new int[]{screenRow,screenCol};
+
+    }
+
+    // Translates raw screen tile coordinates to board array indices,
+    // accounting for the flipped state. The board array itself never changes.
+    private int[] toBoardCoordinates(int screenRow, int screenCol) {
+        if (flipped) {
+            return new int[]{ 7 - screenRow, 7 - screenCol };
+        }
+        return new int[]{ screenRow, screenCol };
+    }
+
+    public static void main (String[]args){
 
         JFrame frame = new JFrame("Chess Board");
         frame.setLayout(new BorderLayout());
 
         ChessBoard board = new ChessBoard();
 
-        Knight k1 = new Knight('d',5,true);
-        //Knight k2 = new Knight('d',4,false);
+        Knight k1 = new Knight('d', 5, true);
+        Knight k2 = new Knight('b',7,false);
+        Knight k3 = new Knight('d',2,false);
 
-
-
-
-        Rook r1 = new Rook('b',5,false);
-        Rook r2 = new Rook('c',6,true);
+        Rook r1 = new Rook('b', 4, false);
+        Rook r2 = new Rook('c',7,true);
+        Rook r3 = new Rook('b',8,false);
 
 
         System.out.println();
-        r1.moveCheck();
-        r2.moveCheck();
+        //r1.moveCheck();
+        //r2.moveCheck();
 
-        JPanel whiteBar = new JPanel(); // right bar
+        /*JPanel whiteBar = new JPanel(); // right bar
         whiteBar.setPreferredSize(new Dimension(pieceBarWidth, pieceBarLength));
         whiteBar.setBackground(Color.LIGHT_GRAY);
 
@@ -304,10 +441,12 @@ public class ChessBoard extends JPanel {
         blackBar.setPreferredSize(new Dimension(pieceBarWidth, pieceBarLength));
         blackBar.setBackground(Color.DARK_GRAY);
 
-        frame.add(board, BorderLayout.CENTER);
         frame.add(blackBar, BorderLayout.WEST);
         frame.add(whiteBar, BorderLayout.EAST);
 
+         */
+
+        frame.add(board, BorderLayout.CENTER);
         frame.setResizable(true);
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -316,4 +455,6 @@ public class ChessBoard extends JPanel {
 
 
     }
+
 }
+

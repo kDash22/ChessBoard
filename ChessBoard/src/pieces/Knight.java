@@ -7,24 +7,24 @@ public class Knight extends Piece{
 
     private boolean check = false; //not decided how to implement checking yet this is just a placeholder
 
-    public Knight(Character col, int chessRow, boolean white){
-        setCol(col);
-        setRow(chessRow);
+    public Knight(Character chessCol, int chessRow, boolean white){
+        setChessCol(chessCol);
+        setChessRow(chessRow);
 
         if (white){
             setIdentification(PieceIdentification.W_KNIGHT);
         } else {
             setIdentification(PieceIdentification.B_KNIGHT);
         }
-        ChessBoard.insertPiece(turnColToIndex(col), chessRow, this);
+        ChessBoard.insertPiece(chessCol, chessRow, this);
 
         validMoveSet = new boolean[8];
     }
 
     @Override
     public void moveCheck() {
-        int col = turnColToIndex(getCol());
-        int row = Global.chessRowToIndex(getChessRow());
+        int col = chessColToIndex(getChessCol());
+        int row = Piece.chessRowToIndex(getChessRow());
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
@@ -61,33 +61,20 @@ public class Knight extends Piece{
                     validMoveSet[i] = true;
                     continue;
                 }
-                //if piece colours are not the same, if it is a king of the different it is not allowed
-                if(refBoard[toRow][toCol].getIdentification().isWhite() && getIdentification().isBlack() &&
-                        refBoard[toRow][toCol].getIdentification() != PieceIdentification.B_KING && refBoard[toRow][toCol].getIdentification() != PieceIdentification.W_KING){
+                //if it is an enemy piece, but if it is the enemy king the move is not allowed as king cannot be taken
+                if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
 
-                    validMoveSet[i] = true;
-                    continue;
-                }
-                if(refBoard[toRow][toCol].getIdentification().isBlack() && getIdentification().isWhite() &&
-                        refBoard[toRow][toCol].getIdentification() != PieceIdentification.B_KING && refBoard[toRow][toCol].getIdentification() != PieceIdentification.W_KING){
+                    if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
+                            refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
+                        check = true;
+                        validMoveSet[i] = false;
 
-                    validMoveSet[i] = true;
-                    continue;
+                    } else {
+                        validMoveSet[i] = true;
+                    }
+                } else {
+                    validMoveSet[i] = false; // Blocked by own piece
                 }
-                //if it is a king of a different team
-                if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING && getIdentification().isWhite()) {
-                    check = true;
-                    validMoveSet[i] = false; // special case
-                    continue;
-                }
-                if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING && getIdentification().isBlack()) {
-                    check = true;
-                    validMoveSet[i] = false; // special case
-                    continue;
-
-                }
-                validMoveSet[i] = false;
-
             }
 
         }
