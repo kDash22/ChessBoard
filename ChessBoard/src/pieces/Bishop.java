@@ -33,11 +33,11 @@ public class Bishop extends Piece {
 
         // Directions: {row_change, col_change}
         // Top-Right, Top-Left, Bottom-Right, Bottom-Left
-        int[][] dirs = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
+        int[][] directions = { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } };
 
-        for (int[] dir : dirs) {
-            int toRow = row + dir[0];
-            int toCol = col + dir[1];
+        for (int[] direction : directions) {
+            int toRow = row + direction[0];
+            int toCol = col + direction[1];
 
             while (toRow >= 0 && toRow < 8 && toCol >= 0 && toCol < 8) {
                 tempMoveSet[count][0] = toRow;
