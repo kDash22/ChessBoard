@@ -16,7 +16,7 @@ public class Rook extends Piece {
         } else {
             setIdentification(PieceIdentification.B_ROOK);
         }
-        ChessBoard.insertPiece(turnColToIndex(col), chessRow ,this);
+        ChessBoard.insertPiece(turnColToIndex(col), chessRow, this);
     }
 
     @Override
@@ -31,8 +31,8 @@ public class Rook extends Piece {
         boolean[] tempValidMoveSet = new boolean[14];
         int count = 0;
 
-        // 4 straight directions
-        int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        // 4 diagonal directions
+        int[][] dirs = { { -1, 1 }, { 1, 1 }, { 1, -1 }, { -1, -1 } };
 
         for (int[] dir : dirs) {
             int toRow = row + dir[0];
@@ -49,7 +49,7 @@ public class Rook extends Piece {
                     // hit an opponent piece
                     if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
                         if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
-                            refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
+                                refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                             check = true;
                             tempValidMoveSet[count] = false; // special check case
                         } else {
@@ -90,4 +90,3 @@ public class Rook extends Piece {
         return "Rook";
     }
 }
-
