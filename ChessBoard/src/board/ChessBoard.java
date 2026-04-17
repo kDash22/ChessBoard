@@ -75,22 +75,25 @@ public class ChessBoard extends JPanel {
     }
 
     public void loadPieces() {
-        //white
-        wPawn = new ImageIcon("pieces/white/white-pawn.png").getImage();
-        wKnight = new ImageIcon("pieces/white/white-knight.png").getImage();
-        wBishop = new ImageIcon("pieces/white/white-bishop.png").getImage();
-        wRook = new ImageIcon("pieces/white/white-rook.png").getImage();
-        wQueen = new ImageIcon("pieces/white/white-Queen.png").getImage();
-        wKing = new ImageIcon("pieces/white/white-king.png").getImage();
+        try {
+            //white
+            wPawn = new ImageIcon(getClass().getResource("/pieceImages/white/white-pawn.png")).getImage();
+            wKnight = new ImageIcon(getClass().getResource("/pieceImages/white/white-knight.png")).getImage();
+            wBishop = new ImageIcon(getClass().getResource("/pieceImages/white/white-bishop.png")).getImage();
+            wRook = new ImageIcon(getClass().getResource("/pieceImages/white/white-rook.png")).getImage();
+            wQueen = new ImageIcon(getClass().getResource("/pieceImages/white/white-queen.png")).getImage();
+            wKing = new ImageIcon(getClass().getResource("/pieceImages/white/white-king.png")).getImage();
 
-        //black
-        bPawn = new ImageIcon("pieces/black/black-pawn.png").getImage();
-        bKnight = new ImageIcon("pieces/black/black-knight.png").getImage();
-        bBishop = new ImageIcon("pieces/black/black-bishop.png").getImage();
-        bRook = new ImageIcon("pieces/black/black-rook.png").getImage();
-        bQueen = new ImageIcon("pieces/black/black-queen.png").getImage();
-        bKing = new ImageIcon("pieces/black/black-king.png").getImage();
-
+            //black
+            bPawn = new ImageIcon(getClass().getResource("/pieceImages/black/black-pawn.png")).getImage();
+            bKnight = new ImageIcon(getClass().getResource("/pieceImages/black/black-knight.png")).getImage();
+            bBishop = new ImageIcon(getClass().getResource("/pieceImages/black/black-bishop.png")).getImage();
+            bRook = new ImageIcon(getClass().getResource("/pieceImages/black/black-rook.png")).getImage();
+            bQueen = new ImageIcon(getClass().getResource("/pieceImages/black/black-queen.png")).getImage();
+            bKing = new ImageIcon(getClass().getResource("/pieceImages/black/black-king.png")).getImage();
+        } catch (Exception e) {
+            throw new RuntimeException("Image loading failed", e);
+        }
     }
 
     public static Image flipPiece(Image piece) {
@@ -493,6 +496,17 @@ public class ChessBoard extends JPanel {
 
     }
 
+
+
+    // Translates raw screen tile coordinates to board array indices,
+    // accounting for the flipped state. The board array itself never changes.
+    private int[] toBoardCoordinates(int screenRow, int screenCol) {
+        if (flipped) {
+            return new int[]{ 7 - screenRow, 7 - screenCol };
+        }
+        return new int[]{ screenRow, screenCol };
+    }
+
     // a method which makes a new board with all the pieces
     public void makeNewBoard(){
 
@@ -539,16 +553,6 @@ public class ChessBoard extends JPanel {
 
 
     }
-
-    // Translates raw screen tile coordinates to board array indices,
-    // accounting for the flipped state. The board array itself never changes.
-    private int[] toBoardCoordinates(int screenRow, int screenCol) {
-        if (flipped) {
-            return new int[]{ 7 - screenRow, 7 - screenCol };
-        }
-        return new int[]{ screenRow, screenCol };
-    }
-
     public static void main (String[]args){
 
         JFrame frame = new JFrame("Chess Board");

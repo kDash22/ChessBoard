@@ -88,12 +88,9 @@ public class Pawn extends Piece{
         }
 
         //capturing a piece logic
-        if (validMoveSet[2] || validMoveSet[3]) {
+        if (validMoveSet[2] ) {
             int toRow2 = moveSet[2][0]; // capture to the left
             int toCol2 = moveSet[2][1];
-
-            int toRow3 = moveSet[3][0]; // capture to the right
-            int toCol3 = moveSet[3][1];
 
             if (refBoard[toRow2][toCol2] == null) { //if there is no piece is present in the left immediate diagonal pawn cannot move there
                 validMoveSet[2] = false;
@@ -103,6 +100,10 @@ public class Pawn extends Piece{
                     validMoveSet[2] = false;
                 }
             }
+        }
+        if (validMoveSet[3]){
+            int toRow3 = moveSet[3][0]; // capture to the right
+            int toCol3 = moveSet[3][1];
 
             if (refBoard[toRow3][toCol3] == null) { //if there is no piece is present in the right immediate diagonal pawn cannot move there
                 validMoveSet[3] = false;
@@ -112,8 +113,8 @@ public class Pawn extends Piece{
                     validMoveSet[3] = false;
                 }
             }
-
         }
+
 
         //en passant to the left logic
         if ((col - 1) >= 0 && col - 1 < 8){ //toColumn must be valid
