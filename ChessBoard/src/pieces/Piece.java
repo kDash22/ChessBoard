@@ -104,7 +104,46 @@ public abstract  class Piece {
 
     public boolean[] getValidMoveSet() {
         moveCheck();
+        filterCheckMoves();
         return validMoveSet;
+    }
+
+    // A version of getValidMoveSet that doesn't check for King safety to avoid infinite recursion
+    public boolean[] getValidMoveSetRaw() {
+        // We don't call moveCheck() here because it's usually called before getValidMoveSetRaw()
+        // in isSquareAttacked.
+        return validMoveSet;
+    }
+
+    // Validates each move in validMoveSet to ensure it doesn't leave the player's King in check
+    private void filterCheckMoves() {
+        if (validMoveSet == null) return;
+
+        int originalRow = chessRowToIndex(getChessRow());
+        int originalCol = chessColToIndex(getChessCol());
+        boolean isWhite = getIdentification().isWhite();
+        Piece[][] board = ChessBoard.getBoard();
+
+        for (int i = 0; i < moveSet.length; i++) {
+            if (validMoveSet[i]) {
+                int toRow = moveSet[i][0];
+                int toCol = moveSet[i][1];
+
+                // Simulate the move
+                Piece target = board[toRow][toCol];
+                board[toRow][toCol] = this;
+                board[originalRow][originalCol] = null;
+
+                // Check if King is safe
+                if (ChessBoard.isKingInCheck(isWhite)) {
+                    validMoveSet[i] = false;
+                }
+
+                // Undo the move
+                board[originalRow][originalCol] = this;
+                board[toRow][toCol] = target;
+            }
+        }
     }
 
     public int[][] getMoveSet() {
