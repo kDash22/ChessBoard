@@ -424,6 +424,20 @@ public class ChessBoard extends JPanel {
 
 
 
+                    // Castling Logic Execution
+                    if (movingPiece instanceof King && Math.abs(selectedCol - selectedToCol) == 2) {
+                        int rookOriginalCol = (selectedToCol == 6) ? 7 : 0;
+                        int rookTargetCol = (selectedToCol == 6) ? 5 : 3;
+
+                        Piece rook = refBoard[selectedRow][rookOriginalCol];
+                        if (rook instanceof Rook) {
+                            rook.setChessCol(Piece.colToChessCol(rookTargetCol));
+                            rook.setHasMoved(true);
+                            refBoard[selectedRow][rookTargetCol] = rook;
+                            refBoard[selectedRow][rookOriginalCol] = null;
+                        }
+                    }
+
                     movingPiece.setChessCol(Piece.colToChessCol(selectedToCol));//updates the piece column
                     movingPiece.setChessRow(Piece.rowToChessRow(selectedToRow));//updates the piece row
                     movingPiece.setHasMoved(true);
