@@ -647,18 +647,24 @@ public class ChessBoard extends JPanel {
 
     // Checks if the game is over and displays a message if so
     public void checkGameOver(boolean whiteTurn) {
+        String color = whiteTurn ? "White" : "Black";
+        System.out.println("Checking game over state for " + color + "...");
+        
         if (!hasLegalMoves(whiteTurn)) {
+            System.out.println("No legal moves found for " + color);
             if (isKingInCheck(whiteTurn)) {
                 String winner = whiteTurn ? "Black" : "White";
+                System.out.println("CHECKMATE! " + winner + " wins!");
                 JOptionPane.showMessageDialog(this, "CHECKMATE! " + winner + " wins!");
             } else {
+                System.out.println("STALEMATE!");
                 JOptionPane.showMessageDialog(this, "STALEMATE! It's a draw.");
             }
         } else if (isKingInCheck(whiteTurn)) {
-            // Optional: Show "Check!" message
-             System.out.println((whiteTurn ? "White" : "Black") + " is in Check!");
+             System.out.println(color + " is in Check!");
         }
     }
+
 
     public static void main (String[]args){
 

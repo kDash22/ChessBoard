@@ -80,7 +80,7 @@ public class King extends Piece {
         }
 
         // --- Castling Logic ---
-        if (!this.hasMoved()) {
+        if (!this.hasMoved() && !ChessBoard.isKingInCheck(getIdentification().isWhite())) {
             // King Side Castling
             if (refBoard[row][7] instanceof Rook rook && !rook.hasMoved()) {
                 if (refBoard[row][5] == null && refBoard[row][6] == null) {
