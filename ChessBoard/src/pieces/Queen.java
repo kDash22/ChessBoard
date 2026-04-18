@@ -5,6 +5,7 @@ import board.ChessBoard;
 
 public class Queen extends Piece {
 
+    private static final int PIECE_VALUE = 9;
     private boolean check = false;
 
     public Queen(Character chessCol, int chessRow, boolean white) {

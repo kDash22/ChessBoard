@@ -6,6 +6,7 @@ import board.ChessBoard;
 public class Bishop extends Piece {
 
     private boolean check = false;
+    private static final int PIECE_VALUE = 3;
 
     public Bishop(Character chessCol, int chessRow, boolean white) {
         setChessCol(chessCol);

@@ -5,6 +5,8 @@ import board.ChessBoard;
 
 public class Rook extends Piece {
 
+    private static final int PIECE_VALUE = 5;
+
     private boolean check = false;
 
     public Rook(Character chessCol, int chessRow, boolean white) {

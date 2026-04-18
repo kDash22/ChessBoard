@@ -6,6 +6,8 @@ import javax.swing.*;
 
 public class Pawn extends Piece{
 
+    private static final int PIECE_VALUE = 1;
+
     private boolean enPassantDangerFromLeft = false;// if this pawn can be taken using en passant from opponent pawn in the left
     private boolean enPassantDangerFromRight = false;// if this pawn can be taken using en passant from opponent pawn in the right
     private boolean enPassantAllowed = false; //if this pawn is allowed to en passant an opponent pawn
