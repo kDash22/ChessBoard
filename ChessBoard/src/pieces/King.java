@@ -55,8 +55,8 @@ public class King extends Piece {
                     tempValidMoveSet[count] = false;
                 }
 
-                // --- King Proximity Rule ---
-                // If the target square is reachable, check if it's adjacent to the enemy King
+                // King Proximity Rule
+                // Check if adjacent squares contain an enemy King
                 if (tempValidMoveSet[count]) {
                     for (int dr = -1; dr <= 1; dr++) {
                         for (int dc = -1; dc <= 1; dc++) {
@@ -64,19 +64,20 @@ public class King extends Piece {
                             int adjCol = toCol + dc;
                             if (adjRow >= 0 && adjRow < 8 && adjCol >= 0 && adjCol < 8) {
                                 Piece adjPiece = refBoard[adjRow][adjCol];
-                                if (adjPiece instanceof King && adjPiece.getIdentification().isWhite() != getIdentification().isWhite()) {
+                                if (adjPiece instanceof King
+                                        && adjPiece.getIdentification().isWhite() != getIdentification().isWhite()) {
                                     tempValidMoveSet[count] = false;
                                     break;
                                 }
                             }
                         }
-                        if (!tempValidMoveSet[count]) break;
+                        if (!tempValidMoveSet[count])
+                            break;
                     }
                 }
                 count++;
             }
         }
-
 
         // --- Castling Logic ---
         if (!this.hasMoved()) {
@@ -99,7 +100,6 @@ public class King extends Piece {
                 }
             }
         }
-
 
         // Trim the arrays
         moveSet = new int[count][2];
