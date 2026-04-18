@@ -426,6 +426,7 @@ public class ChessBoard extends JPanel {
 
                     movingPiece.setChessCol(Piece.colToChessCol(selectedToCol));//updates the piece column
                     movingPiece.setChessRow(Piece.rowToChessRow(selectedToRow));//updates the piece row
+                    movingPiece.setHasMoved(true);
 
                     refBoard[selectedToRow][selectedToCol] = movingPiece;//updates the location of the moves piece
                     refBoard[selectedRow][selectedCol] = null;

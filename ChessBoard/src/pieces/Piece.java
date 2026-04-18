@@ -10,8 +10,17 @@ public abstract  class Piece {
     private Character chessCol; //column letter in the chessboard
     private int chessRow; //chessRow digit in the chessboard
     private PieceIdentification identification;//what piece it is and what team does it belong to
+    private boolean hasMoved = false;
 
     //setters
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
+    }
+
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+
     public void setChessCol(Character chessCol) {
         if (ChessBoard.COLUMN_LETTERS.contains(chessCol)){
             this.chessCol = chessCol;
