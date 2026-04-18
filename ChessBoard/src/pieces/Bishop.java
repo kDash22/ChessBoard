@@ -53,7 +53,7 @@ public class Bishop extends Piece {
                         if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
                                 refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                             check = true;
-                            tempValidMoveSet[count] = false; // King check logic
+                            tempValidMoveSet[count] = true; // Essential for check detection
                         } else {
                             tempValidMoveSet[count] = true;
                         }

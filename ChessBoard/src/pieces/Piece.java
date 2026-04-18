@@ -121,6 +121,9 @@ public abstract class Piece {
 
         int originalRow = chessRowToIndex(getChessRow());
         int originalCol = chessColToIndex(getChessCol());
+        char originalColChar = getChessCol();
+        int originalRowInt = getChessRow();
+        
         boolean isWhite = getIdentification().isWhite();
         Piece[][] board = ChessBoard.getBoard();
 
@@ -133,6 +136,10 @@ public abstract class Piece {
                 Piece target = board[toRow][toCol];
                 board[toRow][toCol] = this;
                 board[originalRow][originalCol] = null;
+                
+                // Update internal coordinates so moveCheck() works correctly
+                this.setChessCol(colToChessCol(toCol));
+                this.setChessRow(rowToChessRow(toRow));
 
                 // Check if King is safe
                 if (ChessBoard.isKingInCheck(isWhite)) {
@@ -140,11 +147,14 @@ public abstract class Piece {
                 }
 
                 // Undo the move
+                this.setChessCol(originalColChar);
+                this.setChessRow(originalRowInt);
                 board[originalRow][originalCol] = this;
                 board[toRow][toCol] = target;
             }
         }
     }
+
 
     public int[][] getMoveSet() {
         moveCheck();
