@@ -24,9 +24,9 @@ public class King extends Piece {
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
-        // A King can have up to 8 moves
-        int[][] tempMoveSet = new int[8][2];
-        boolean[] tempValidMoveSet = new boolean[8];
+        // A King can have up to 8 moves + 2 for castling
+        int[][] tempMoveSet = new int[10][2];
+        boolean[] tempValidMoveSet = new boolean[10];
         int count = 0;
 
         // All 8 directions
@@ -57,6 +57,29 @@ public class King extends Piece {
                 count++;
             }
         }
+
+        // --- Castling Logic ---
+        if (!this.hasMoved()) {
+            // King Side Castling
+            if (refBoard[row][7] instanceof Rook rook && !rook.hasMoved()) {
+                if (refBoard[row][5] == null && refBoard[row][6] == null) {
+                    tempMoveSet[count][0] = row;
+                    tempMoveSet[count][1] = 6;
+                    tempValidMoveSet[count] = true;
+                    count++;
+                }
+            }
+            // Queen Side Castling
+            if (refBoard[row][0] instanceof Rook rook && !rook.hasMoved()) {
+                if (refBoard[row][1] == null && refBoard[row][2] == null && refBoard[row][3] == null) {
+                    tempMoveSet[count][0] = row;
+                    tempMoveSet[count][1] = 2;
+                    tempValidMoveSet[count] = true;
+                    count++;
+                }
+            }
+        }
+
 
         // Trim the arrays
         moveSet = new int[count][2];
