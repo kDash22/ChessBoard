@@ -6,6 +6,7 @@ import board.ChessBoard;
 public class Knight extends Piece{
 
     private boolean check = false;//not decided how to implement checking yet this is just a placeholder
+    private static final int PIECE_VALUE = 3;
 
     public Knight(Character chessCol, int chessRow, boolean white){
         setChessCol(chessCol);
