@@ -36,7 +36,8 @@ public class Pawn extends Piece{
         Piece[][] refBoard = ChessBoard.getBoard();
 
         int countGeneralMoves = 4;//used to get valid move count
-        //the logic is reversed for pawn because the tempValidMoveset is all set to true for first 4 indexes at first so it is easier to just reduce from the known move count
+        //the logic is reversed for pawn because the first 4 indexes in tempValidMoveSet represent the standard pawn moves
+        //and are marked valid only if they stay within bounds, so it is easier to reduce from the known move count
 
         int countEnPassantMoves = 0;//the logic is not reversed for en passant moves as last 2 indexes are not set to true
         //6 possible moves for pawn
