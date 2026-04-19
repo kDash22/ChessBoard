@@ -149,8 +149,10 @@ public class Pawn extends Piece{
 
                         tempMoveSet[4][0] = row - 1; //white moves form 7 -> 0 so the row number reduces
                         tempMoveSet[4][1] = chessColToIndex(p.getChessCol());// in en passant the piece moves to the same column as the opponent piece, same as capturing normally
-                        tempValidMoveSet[4] = true;
-                        countEnPassantMoves++;
+                        if(refBoard[ tempMoveSet[4][0] ][ tempMoveSet[4][1] ] == null){
+                            tempValidMoveSet[4] = true;
+                            countEnPassantMoves++;
+                        }
 
                         System.out.println("can enpassant to " + rowToChessRow(tempMoveSet[4][0]) + colToChessCol(tempMoveSet[4][1]));
                         System.out.println("valid: " + tempValidMoveSet[4]);
@@ -163,8 +165,10 @@ public class Pawn extends Piece{
                     if (p.enPassantDangerFromRight) {
                         tempMoveSet[4][0] = row + 1; //black moves form 0 -> 7 so the row number increases
                         tempMoveSet[4][1] = chessColToIndex(p.getChessCol()); // in en passant the piece moves to the same column as the opponent piece, same as capturing normally
-                        tempValidMoveSet[4] = true;
-                        countEnPassantMoves++;
+                        if(refBoard[ tempMoveSet[4][0] ][ tempMoveSet[4][1] ] == null){
+                            tempValidMoveSet[4] = true;
+                            countEnPassantMoves++;
+                        }
 
                         System.out.println("can enpassant to " + rowToChessRow(tempMoveSet[4][0]) + colToChessCol(tempMoveSet[4][1]));
                         System.out.println("valid: " + tempValidMoveSet[4]);
@@ -189,8 +193,11 @@ public class Pawn extends Piece{
                     if (p.enPassantDangerFromLeft) {// we are to p's left, so this is the correct flag
                         tempMoveSet[5][0] = row - 1; //white moves form 7 -> 0 so the row number reduces
                         tempMoveSet[5][1] = chessColToIndex(p.getChessCol());// in en passant the piece moves to the same column as the opponent piece, same as capturing normally
-                        tempValidMoveSet[5] = true;
-                        countEnPassantMoves++;
+                        if(refBoard[ tempMoveSet[5][0] ][ tempMoveSet[5][1] ] == null){
+                            tempValidMoveSet[5] = true;
+                            countEnPassantMoves++;
+                        }
+
 
                         System.out.println("can enpassant to " + rowToChessRow(tempMoveSet[5][0]) + colToChessCol(tempMoveSet[5][1]));
                         System.out.println("valid: " + tempValidMoveSet[5]);
@@ -203,8 +210,10 @@ public class Pawn extends Piece{
 
                         tempMoveSet[5][0] = row + 1; //black moves form 0 -> 7 so the row number increases
                         tempMoveSet[5][1] = chessColToIndex(p.getChessCol());// in en passant the piece moves to the same column as the opponent piece, same as capturing normally
-                        tempValidMoveSet[5] = true;
-                        countEnPassantMoves++;
+                        if(refBoard[ tempMoveSet[5][0] ][ tempMoveSet[5][1] ] == null){
+                            tempValidMoveSet[5] = true;
+                            countEnPassantMoves++;
+                        }
 
                         System.out.println("can enpassant to " + rowToChessRow(tempMoveSet[5][0]) + colToChessCol(tempMoveSet[5][1]));
                         System.out.println("valid: " + tempValidMoveSet[5]);
