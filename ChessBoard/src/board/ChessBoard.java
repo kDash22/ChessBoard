@@ -389,7 +389,9 @@ public class ChessBoard extends JPanel {
 
                     //if en passant happens, the logic for capturing the piece
                     if (PieceIdentification.isPawn(movingPiece)) {
-                        boolean isDiagonal = selectedToCol != selectedCol; //enPassant move must be diagonal
+                        boolean isSingleFileStep = Math.abs(selectedToCol - selectedCol) == 1; // en passant must move exactly one file
+                        boolean isSingleRankStep = Math.abs(selectedToRow - selectedRow) == 1; // en passant must move exactly one rank
+                        boolean isDiagonal = isSingleFileStep && isSingleRankStep; // enPassant move must be a single-step diagonal
                         boolean landingEmpty = refBoard[selectedToRow][selectedToCol] == null; //en passant'ing pawn must land on an empty square
 
                         if (isDiagonal && landingEmpty) { // only true for en passant
