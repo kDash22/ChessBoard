@@ -470,6 +470,7 @@ public class ChessBoard extends JPanel {
 
                     repaint();//board refresh
                     flipBoard();//flips board after a successful move
+                    checkGameOver(!movingPiece.getIdentification().isWhite());
                     break;
                 }
 
@@ -568,6 +569,103 @@ public class ChessBoard extends JPanel {
 
 
     }
+    // Finds the current position of the King of the specified color
+    public static int[] findKing(boolean white) {
+        Piece[][] refBoard = getBoard();
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece p = refBoard[r][c];
+                if (p instanceof King && p.getIdentification().isWhite() == white) {
+                    return new int[]{r, c};
+                }
+            }
+        }
+        return null; // Should never happen in a real game
+    }
+
+    // Checks if a square is under attack by any piece of the specified color
+    public static boolean isSquareAttacked(int row, int col, boolean attackedByWhite) {
+        Piece[][] refBoard = getBoard();
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece p = refBoard[r][c];
+                if (p != null && p.getIdentification().isWhite() == attackedByWhite) {
+                    // Pawns capture differently than they move
+                    if (p instanceof Pawn) {
+                        int pRow = Piece.chessRowToIndex(p.getChessRow());
+                        int pCol = Piece.chessColToIndex(p.getChessCol());
+                        int direction = attackedByWhite ? -1 : 1;
+                        if (pRow + direction == row && Math.abs(pCol - col) == 1) {
+                            return true;
+                        }
+                    } else if (p instanceof King) {
+                        // King proximity check to avoid recursive calls
+                        int pRow = Piece.chessRowToIndex(p.getChessRow());
+                        int pCol = Piece.chessColToIndex(p.getChessCol());
+                        if (Math.abs(pRow - row) <= 1 && Math.abs(pCol - col) <= 1) {
+                            return true;
+                        }
+                    } else {
+                        p.moveCheck();
+                        int[][] moveSet = p.getMoveSet();
+                        boolean[] validMoves = p.getValidMoveSetRaw(); // We'll add this method to Piece
+                        for (int i = 0; i < moveSet.length; i++) {
+                            if (validMoves[i] && moveSet[i][0] == row && moveSet[i][1] == col) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isKingInCheck(boolean white) {
+        int[] kingPos = findKing(white);
+        if (kingPos == null) return false;
+        return isSquareAttacked(kingPos[0], kingPos[1], !white);
+    }
+
+
+    // Checks if the specified color player has any legal moves left
+    public boolean hasLegalMoves(boolean white) {
+        Piece[][] refBoard = getBoard();
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece p = refBoard[r][c];
+                if (p != null && p.getIdentification().isWhite() == white) {
+                    boolean[] moves = p.getValidMoveSet();
+                    for (boolean canMove : moves) {
+                        if (canMove) return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    // Checks if the game is over and displays a message if so
+    public void checkGameOver(boolean whiteTurn) {
+        String color = whiteTurn ? "White" : "Black";
+        System.out.println("Checking game over state for " + color + "...");
+        
+        if (!hasLegalMoves(whiteTurn)) {
+            System.out.println("No legal moves found for " + color);
+            if (isKingInCheck(whiteTurn)) {
+                String winner = whiteTurn ? "Black" : "White";
+                System.out.println("CHECKMATE! " + winner + " wins!");
+                JOptionPane.showMessageDialog(this, "CHECKMATE! " + winner + " wins!");
+            } else {
+                System.out.println("STALEMATE!");
+                JOptionPane.showMessageDialog(this, "STALEMATE! It's a draw.");
+            }
+        } else if (isKingInCheck(whiteTurn)) {
+             System.out.println(color + " is in Check!");
+        }
+    }
+
+
     public static void main (String[]args){
 
         JFrame frame = new JFrame("Chess Board");
