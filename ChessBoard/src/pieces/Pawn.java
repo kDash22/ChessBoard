@@ -215,7 +215,12 @@ public class Pawn extends Piece{
             }
         }
 
-        int count = countEnPassantMoves+countGeneralMoves; //the total valid move number
+        int count = 0; //the total valid move number
+        for (int i = 0; i < 6; i++) {
+            if (tempValidMoveSet[i]) {
+                count++;
+            }
+        }
         moveSet = new int[count][2];
         validMoveSet = new boolean[count];
 
