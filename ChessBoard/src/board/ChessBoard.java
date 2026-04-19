@@ -19,7 +19,7 @@ public class ChessBoard extends JPanel {
     private int selectedRow = -1; //to get the row of the selected piece
     private int selectedCol = -1; //to get the column of the selected piece
 
-    private List<Piece> capturedByWhite = new ArrayList<>();
+    private List<Piece> capturedByWhite = new ArrayList<>(); 
     private List<Piece> capturedByBlack= new ArrayList<>();
 
     private int selectedToRow = -1; //to get the row of the square that the piece is going to move to
@@ -388,25 +388,22 @@ public class ChessBoard extends JPanel {
                     Piece target = refBoard[selectedToRow][selectedToCol];//moves the piece
 
                     //if en passant happens, the logic for capturing the piece
-                    if (PieceIdentification.isPawn(movingPiece)){
-                        for (int k = 4; k < 6; k++ ){//en passant moves are 4 and 5
-                            if (validMoveset[k]){
+                    if (PieceIdentification.isPawn(movingPiece)) {
+                        boolean isDiagonal = selectedToCol != selectedCol; //enPassant move must be diagonal
+                        boolean landingEmpty = refBoard[selectedToRow][selectedToCol] == null; //en passant'ing pawn must land on an empty square
 
-                                if (selectedToRow== moveSet[k][0]
-                                        && selectedToCol == moveSet[k][1] ){//checking if the move was an en passant
+                        if (isDiagonal && landingEmpty) { // only true for en passant
 
-                                    Pawn enPassantCapturedPawn = (Pawn) refBoard[selectedRow][selectedCol] ; //selectedRow because the pawn that gets captured is in the row as the pawn that does the en passant
+                            Piece captured = refBoard[selectedRow][selectedToCol];
+                            if (captured instanceof Pawn) {
+                                if (captured.getIdentification().isWhite())
+                                    capturedByBlack.add(captured);
+                                else
+                                    capturedByWhite.add(captured);
 
-                                    if (enPassantCapturedPawn.getIdentification().isWhite()){ //adding the captured pice
-                                        capturedByBlack.add(enPassantCapturedPawn);
-                                    } else {
-                                        capturedByWhite.add(enPassantCapturedPawn);
-                                    }
-
-                                    refBoard[selectedRow][selectedToCol] = null;//selectedRow because the pawn that gets captured is in the row as the pawn that does the en passant
-
-
-                                }
+                                refBoard[selectedRow][selectedToCol] = null;
+                            } else {
+                                throw new IllegalArgumentException(" En Passant logic error in movePiece method ! ");
 
                             }
                         }

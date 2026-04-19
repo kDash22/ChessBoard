@@ -19,7 +19,6 @@ public class Knight extends Piece{
         }
         ChessBoard.insertPiece(chessCol, chessRow, this);
 
-        validMoveSet = new boolean[8];
     }
 
     @Override
@@ -29,13 +28,15 @@ public class Knight extends Piece{
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
+        int count = 0;//used to get valid move count
         //8 possible moves for a knight
-        moveSet = new int[][]{
+        int[][] tempMoveSet = new int[][]{
                 {row + 2, col + 1}, {row + 2, col - 1},
                 {row - 2, col + 1}, {row - 2, col - 1},
                 {row + 1, col + 2}, {row + 1, col - 2},
                 {row - 1, col + 2}, {row - 1, col - 2}
         };
+        boolean[] tempValidMoveSet = new boolean[8];
 
         //8 possible moves for a knight
         int[] move1 = {row + 2, col + 1};
@@ -52,14 +53,15 @@ public class Knight extends Piece{
 
         for(int i = 0 ; i < 8 ; i++  ){
 
-            int toCol = moveSet[i][1];
-            int toRow = moveSet[i][0];
+            int toCol = tempMoveSet[i][1];
+            int toRow = tempMoveSet[i][0];
 
             if (toCol < 8 && toCol >=0 && toRow < 8 && toRow >= 0 ){
 
                 //if empty square
                 if (refBoard[toRow][toCol] == null){
-                    validMoveSet[i] = true;
+                    tempValidMoveSet[i] = true;
+                    count++;
                     continue;
                 }
                 //if it is an enemy piece, but if it is the enemy king the move is not allowed as king cannot be taken
@@ -68,18 +70,36 @@ public class Knight extends Piece{
                     if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
                             refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                         check = true;
-                        validMoveSet[i] = true; // Essential for check detection
-
+                        tempValidMoveSet[i] = true; // Essential for check detection
+                        count++;
                     } else {
-                        validMoveSet[i] = true;
+                        tempValidMoveSet[i] = true;
+                        count++;
                     }
                 } else {
-                    validMoveSet[i] = false; // Blocked by own piece
+                    tempValidMoveSet[i] = false; // Blocked by own piece
                 }
             }
 
         }
-        Global.print1D(validMoveSet);
+        moveSet = new int[count][2];
+        validMoveSet = new boolean[count];
+
+        System.out.println("\nKnight valid move count : "+count+"\n");
+        int j = 0;
+
+        for (int i = 0; i < 8; i++) {
+            if (tempValidMoveSet[i]) {
+                moveSet[j][0] = tempMoveSet[i][0];
+                moveSet[j][1] = tempMoveSet[i][1];
+                validMoveSet[j] = true;
+                j++;
+            }
+        }
+
+
+        System.out.print("Knight : ");
+        Global.print1D(tempValidMoveSet);
     }
 
     @Override

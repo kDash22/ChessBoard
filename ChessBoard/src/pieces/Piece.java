@@ -116,7 +116,7 @@ public abstract class Piece {
     }
 
     // Validates each move in validMoveSet to ensure it doesn't leave the player's King in check
-    private void filterCheckMoves() {
+    protected void filterCheckMoves() {
         if (validMoveSet == null) return;
 
         int originalRow = chessRowToIndex(getChessRow());
