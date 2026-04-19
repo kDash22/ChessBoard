@@ -10,8 +10,8 @@ public class Pawn extends Piece{
 
     private boolean enPassantDangerFromLeft = false;// if this pawn can be taken using en passant from opponent pawn in the left
     private boolean enPassantDangerFromRight = false;// if this pawn can be taken using en passant from opponent pawn in the right
+    private boolean enPassantVulnerable = false; // set only when this pawn actually double-stepped
     private boolean enPassantAllowed = false; //if this pawn is allowed to en passant an opponent pawn
-    private boolean check = false; // not decided how to implement check yet, this is just a placeholder
 
     public Pawn(Character chessCol, int chessRow, boolean white){
         setChessCol(chessCol);
@@ -35,11 +35,6 @@ public class Pawn extends Piece{
 
         Piece[][] refBoard = ChessBoard.getBoard();
 
-        int countGeneralMoves = 4;//used to get valid move count
-        //the logic is reversed for pawn because the first 4 indexes in tempValidMoveSet represent the standard pawn moves
-        //and are marked valid only if they stay within bounds, so it is easier to reduce from the known move count
-
-        int countEnPassantMoves = 0;//the logic is not reversed for en passant moves as last 2 indexes are not set to true
         //6 possible moves for pawn
         int[][] tempMoveSet;
         boolean[] tempValidMoveSet = new boolean[6];
@@ -73,9 +68,9 @@ public class Pawn extends Piece{
 
             if (refBoard[toRow][toCol] != null) { //because the validMoveSet can be assumed to be filled with trues, we just flip it to false again if the move is blocked by another piece
                 tempValidMoveSet[0] = false;
-                countGeneralMoves--;
+
                 tempValidMoveSet[1] = false;//2 square move also gets blocked
-                countGeneralMoves--;
+
             }
 
         }
@@ -88,11 +83,11 @@ public class Pawn extends Piece{
             if (isOnStartingRow()) { //uses a method to see if the pawn is in the starting row
                 if (refBoard[toRow][toCol] != null) {
                     tempValidMoveSet[1] = false; //flip the validMoveSet to false because it is as assumed the array is filled with trues
-                    countGeneralMoves--;
+
                 }
             } else {
                 tempValidMoveSet[1] = false; //the 2 square move not valid if the pawn is not in the starting row
-                countGeneralMoves--;
+
             }
         }
 
@@ -103,12 +98,12 @@ public class Pawn extends Piece{
 
             if (refBoard[toRow2][toCol2] == null) { //if there is no piece is present in the left immediate diagonal pawn cannot move there
                 tempValidMoveSet[2] = false;
-                countGeneralMoves--;
+
             } else {
 
                 if (getIdentification().isWhite() == refBoard[toRow2][toCol2].getIdentification().isWhite()) { // must be an opponent piece
                     tempValidMoveSet[2] = false;
-                    countGeneralMoves--;
+
                 }
             }
         }
@@ -118,99 +113,51 @@ public class Pawn extends Piece{
 
             if (refBoard[toRow3][toCol3] == null) { //if there is no piece is present in the right immediate diagonal pawn cannot move there
                 tempValidMoveSet[3] = false;
-                countGeneralMoves--;
+
             } else {
 
                 if (getIdentification().isWhite() == refBoard[toRow3][toCol3].getIdentification().isWhite()) { // must be an opponent piece
                     tempValidMoveSet[3] = false;
-                    countGeneralMoves--;
+
                 }
             }
         }
 
 
         //en passant to the left logic
-        if ((col - 1) >= 0 && col - 1 < 8){ //toColumn must be valid
-            if (PieceIdentification.isPawn(refBoard[row][col - 1])) {//only a pawn can be taken using en passant
-
-                Pawn p = (Pawn) refBoard[row][col - 1];
-
-
-                    //checking if this pawn has the ability to en passant
-                    //only allowed to en passant if this pawn does it immediately after the opponent moves a pawn 2 squares
-                    //if not done on the immediate turn the privilege is withdrawn
-
-                p.enPassantDangerCheck(); //check if the opponent pawn can be en passant'ed
-
-
-                //for white and black the coordinate system is different because of directions
-                if (getIdentification().isWhite()) {
-
-                    if (p.enPassantDangerFromRight) {// we are to p's right, so this is the correct flag
-
-                        tempMoveSet[4][0] = row - 1; //white moves form 7 -> 0 so the row number reduces
-                        tempMoveSet[4][1] = chessColToIndex(p.getChessCol());// in en passant the piece moves to the same column as the opponent piece, same as capturing normally
+        if ((col - 1) >= 0 && col - 1 < 8) {
+            Piece leftPiece = refBoard[row][col - 1];
+            if (PieceIdentification.isPawn(leftPiece)) {
+                Pawn p = (Pawn) leftPiece;
+                boolean isOpponent = p.getIdentification().isWhite() != getIdentification().isWhite();
+                if (isOpponent && p.isEnPassantVulnerable()) {
+                    int targetRow = getIdentification().isWhite() ? row - 1 : row + 1;
+                    int targetCol = col - 1;
+                    if (refBoard[targetRow][targetCol] == null) {
+                        tempMoveSet[4][0] = targetRow;
+                        tempMoveSet[4][1] = targetCol;
                         tempValidMoveSet[4] = true;
-                        countEnPassantMoves++;
-
-                        System.out.println("can enpassant to " + rowToChessRow(tempMoveSet[4][0]) + colToChessCol(tempMoveSet[4][1]));
-                        System.out.println("valid: " + tempValidMoveSet[4]);
 
                     }
-
-
-                } else {
-
-                    if (p.enPassantDangerFromRight) {
-                        tempMoveSet[4][0] = row + 1; //black moves form 0 -> 7 so the row number increases
-                        tempMoveSet[4][1] = chessColToIndex(p.getChessCol()); // in en passant the piece moves to the same column as the opponent piece, same as capturing normally
-                        tempValidMoveSet[4] = true;
-                        countEnPassantMoves++;
-
-                        System.out.println("can enpassant to " + rowToChessRow(tempMoveSet[4][0]) + colToChessCol(tempMoveSet[4][1]));
-                        System.out.println("valid: " + tempValidMoveSet[4]);
-                    }
-
                 }
-
-
             }
-
         }
 
         //en passant logic to the right
-        if (col + 1 >= 0 && col + 1 < 8) {
-            if (PieceIdentification.isPawn(refBoard[row][col + 1])) {
-                Pawn p = (Pawn) refBoard[row][col + 1];
-                p.enPassantDangerCheck();
-
-
-                if (getIdentification().isWhite()) {
-
-                    if (p.enPassantDangerFromLeft) {// we are to p's left, so this is the correct flag
-                        tempMoveSet[5][0] = row - 1; //white moves form 7 -> 0 so the row number reduces
-                        tempMoveSet[5][1] = chessColToIndex(p.getChessCol());// in en passant the piece moves to the same column as the opponent piece, same as capturing normally
+        if ((col + 1) >= 0 && col + 1 < 8) {
+            Piece rightPiece = refBoard[row][col + 1];
+            if (PieceIdentification.isPawn(rightPiece)) {
+                Pawn p = (Pawn) rightPiece;
+                boolean isOpponent = p.getIdentification().isWhite() != getIdentification().isWhite();
+                if (isOpponent && p.isEnPassantVulnerable()) {
+                    int targetRow = getIdentification().isWhite() ? row - 1 : row + 1;
+                    int targetCol = col + 1;
+                    if (refBoard[targetRow][targetCol] == null) {
+                        tempMoveSet[5][0] = targetRow;
+                        tempMoveSet[5][1] = targetCol;
                         tempValidMoveSet[5] = true;
-                        countEnPassantMoves++;
 
-                        System.out.println("can enpassant to " + rowToChessRow(tempMoveSet[5][0]) + colToChessCol(tempMoveSet[5][1]));
-                        System.out.println("valid: " + tempValidMoveSet[5]);
                     }
-
-
-                } else {
-
-                    if (p.enPassantDangerFromLeft) {
-
-                        tempMoveSet[5][0] = row + 1; //black moves form 0 -> 7 so the row number increases
-                        tempMoveSet[5][1] = chessColToIndex(p.getChessCol());// in en passant the piece moves to the same column as the opponent piece, same as capturing normally
-                        tempValidMoveSet[5] = true;
-                        countEnPassantMoves++;
-
-                        System.out.println("can enpassant to " + rowToChessRow(tempMoveSet[5][0]) + colToChessCol(tempMoveSet[5][1]));
-                        System.out.println("valid: " + tempValidMoveSet[5]);
-                    }
-
                 }
             }
         }
@@ -224,7 +171,7 @@ public class Pawn extends Piece{
         moveSet = new int[count][2];
         validMoveSet = new boolean[count];
 
-        System.out.println("\nPawn valid move count : "+count+"\n");
+        //System.out.println("\nPawn valid move count : "+count+"\n");
         int j = 0;
 
         for (int i = 0; i < 6; i++) {
@@ -236,8 +183,8 @@ public class Pawn extends Piece{
             }
         }
 
-        System.out.print("Pawn : ");
-        Global.print1D(tempValidMoveSet);
+        //System.out.print("Pawn : ");
+        //Global.print1D(tempValidMoveSet);
 
     }
 
@@ -277,7 +224,7 @@ public class Pawn extends Piece{
             if (col+1 >= 0 && col+1 <8){ // column must be valid
                 if (PieceIdentification.isPawn(refBoard[dangerRow][col+1]) && refBoard[dangerRow][col+1].getIdentification().isBlack()){ //if there is another black pawn to the right
                     enPassantDangerFromRight = true;
-                    System.out.println("this piece could be enPassant'ed next move : "+refBoard[dangerRow][col].getChessCol()+refBoard[dangerRow][col].getChessRow());
+                    //System.out.println("this piece could be enPassant'ed next move : "+refBoard[dangerRow][col].getChessCol()+refBoard[dangerRow][col].getChessRow());
                     ((Pawn) refBoard[dangerRow][col+1]).enPassantAllowed = true; //gives said pawn en passant privileges
 
                 }
@@ -286,7 +233,7 @@ public class Pawn extends Piece{
             if (col-1 >= 0 && col-1 <8){//column must be valid
                 if (PieceIdentification.isPawn(refBoard[dangerRow][col-1]) && refBoard[dangerRow][col-1].getIdentification().isBlack()){//if there is another black pawn to the left
                     enPassantDangerFromLeft = true;
-                    System.out.println("this piece could be enPassant'ed next move : "+refBoard[dangerRow][col].getChessCol()+refBoard[dangerRow][col].getChessRow());
+                    //System.out.println("this piece could be enPassant'ed next move : "+refBoard[dangerRow][col].getChessCol()+refBoard[dangerRow][col].getChessRow());
                     ((Pawn) refBoard[dangerRow][col-1]).enPassantAllowed = true; //gives said pawn en passant privileges
 
                 }
@@ -300,7 +247,7 @@ public class Pawn extends Piece{
             if (col+1 >= 0 && col+1 <8){//column must be valid
                 if (PieceIdentification.isPawn(refBoard[dangerRow][col+1]) && refBoard[dangerRow][col+1].getIdentification().isWhite()){//if there is another white pawn to the right
                     enPassantDangerFromRight = true;
-                    System.out.println("this piece could be enPassant'ed next move : "+refBoard[dangerRow][col].getChessCol()+refBoard[dangerRow][col].getChessRow());
+                    //System.out.println("this piece could be enPassant'ed next move : "+refBoard[dangerRow][col].getChessCol()+refBoard[dangerRow][col].getChessRow());
                     ((Pawn) refBoard[dangerRow][col+1]).enPassantAllowed = true; //gives said pawn the en passant privileges
 
                 }
@@ -309,7 +256,7 @@ public class Pawn extends Piece{
             if (col-1 >= 0 && col-1 <8){
                 if (PieceIdentification.isPawn(refBoard[dangerRow][col-1]) && refBoard[dangerRow][col-1].getIdentification().isWhite()){//if there is another white pawn to the left
                     enPassantDangerFromLeft = true;
-                    System.out.println("this piece could be enPassant'ed next move : "+refBoard[dangerRow][col].getChessCol()+refBoard[dangerRow][col].getChessRow());
+                    //System.out.println("this piece could be enPassant'ed next move : "+refBoard[dangerRow][col].getChessCol()+refBoard[dangerRow][col].getChessRow());
                     ((Pawn) refBoard[dangerRow][col-1]).enPassantAllowed = true;//gives said pawn the en passant privileges
 
                 }
@@ -384,6 +331,11 @@ public class Pawn extends Piece{
     public boolean getEnPassantAllowed(){
         return enPassantAllowed;
     }
+
+    public boolean isEnPassantVulnerable() { return enPassantVulnerable; }
+
+    //setters
+    public void setEnPassantVulnerable(boolean v) { enPassantVulnerable = v; }
 
     //a method used to release a pawn from en passant danger if the opponent doesn't use en passant in his immediate turn
     public void releaseEnPassantDanger(){

@@ -188,8 +188,10 @@ public class ChessBoard extends JPanel {
                 else
                     g2d.setColor(Color.GRAY);
 
-                if (row + col == 0)
+                /*if (row + col == 0)
                     g2d.setColor(Color.RED);
+
+                 */
 
                 g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
@@ -246,6 +248,8 @@ public class ChessBoard extends JPanel {
 
             }
         }
+        highlightCheckedKing(g2d);
+
         //highlightValidSquare(g2d, new Knight('d',5,true));
         //highlightValidSquare(g2d, new Knight('d',4,false));
         //highlightValidSquare(g2d, new Rook('b',5,false));
@@ -359,6 +363,22 @@ public class ChessBoard extends JPanel {
 
                 if (r == selectedToRow && c == selectedToCol){
 
+                    // enPassantVulnerable was only cleared inside the immediateAction block, which only ran
+                    // if opponent pawns were already adjacent during the double-step — leaving the flag stuck
+                    // as true forever in all other cases. Clearing it here on every move guarantees the
+                    // en passant window always expires after exactly one turn.
+
+                    boolean movingIsWhite = movingPiece.getIdentification().isWhite();
+                    for (int r2 = 0; r2 < 8; r2++) {
+                        for (int c2 = 0; c2 < 8; c2++) {
+                            Piece pp = refBoard[r2][c2];
+                            if (pp instanceof Pawn && pp.getIdentification().isWhite() != movingIsWhite) {
+                                ((Pawn) pp).setEnPassantVulnerable(false);
+                            }
+                        }
+                    }
+
+
                     //en passant logic
                     if (immediateAction){//the player must make the en passant on his immediate turn
 
@@ -380,6 +400,7 @@ public class ChessBoard extends JPanel {
                                 }
 
                                 p.releaseEnPassantDanger();//release the en passant danger from the endangered pawns
+                                p.setEnPassantVulnerable(false);
                             }
                         }
                         immediateAction = false;//sets the special move check to false
@@ -394,7 +415,7 @@ public class ChessBoard extends JPanel {
                         boolean isDiagonal = isSingleFileStep && isSingleRankStep; // enPassant move must be a single-step diagonal
                         boolean landingEmpty = refBoard[selectedToRow][selectedToCol] == null; //en passant'ing pawn must land on an empty square
 
-                        if (isDiagonal && landingEmpty) { // only true for en passant
+                        if (isDiagonal && landingEmpty ) { // only true for en passant
 
                             Piece captured = refBoard[selectedRow][selectedToCol];
                             if (captured instanceof Pawn) {
@@ -454,6 +475,8 @@ public class ChessBoard extends JPanel {
                         //checks if a pawn can be in en passant danger
                         if ((p.getIdentification().isWhite() && selectedToRow == selectedRow-2)
                                 || (p.getIdentification().isBlack() && selectedToRow == selectedRow+2)){
+
+                            p.setEnPassantVulnerable(true); //flag set only on actual double-step
 
                             boolean[] enPassantDanger = p.enPassantDangerCheck(); //checking if there is opponent pawns that can jump to the oppotunity
                             if (enPassantDanger[0] || enPassantDanger[1]){
@@ -626,6 +649,27 @@ public class ChessBoard extends JPanel {
         return isSquareAttacked(kingPos[0], kingPos[1], !white);
     }
 
+    private void highlightCheckedKing(Graphics2D g2d){
+        int row, col;
+        if (isKingInCheck(true)){
+            int[] kingPos = findKing(true);
+            row = kingPos[0];
+            col = kingPos[1];
+
+            g2d.setColor(new Color(255,0,0,180));
+            g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        }
+        if (isKingInCheck(false)){
+            int[] kingPos = findKing(false);
+            row = kingPos[0];
+            col = kingPos[1];
+
+            g2d.setColor(new Color(255,0,0,180));
+            g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        }
+
+
+    }
 
     // Checks if the specified color player has any legal moves left
     public boolean hasLegalMoves(boolean white) {
@@ -671,41 +715,6 @@ public class ChessBoard extends JPanel {
         frame.setLayout(new BorderLayout());
 
         ChessBoard board = new ChessBoard();
-
-        //Knight k1 = new Knight('d', 5, true);
-        //Knight k2 = new Knight('b',7,false);
-        //Knight k3 = new Knight('d',2,false);
-        //Knight k4 = new Knight('c',4,true);
-
-        //Rook r1 = new Rook('b', 4, false);
-        //Rook r2 = new Rook('c',7,true);
-        //Rook r3 = new Rook('b',8,false);
-
-        //Pawn p1 = new Pawn('c',2,true);
-        //Pawn p2 = new Pawn('d',7,false);
-        //Pawn p3 = new Pawn('f',7,true);
-
-        //King king1 = new King('e',1,true);
-        //King king2 = new King('d',8,false);
-/*
-        System.out.println();
-
-
-        r1.moveCheck();
-        r2.moveCheck();
-
-        JPanel whiteBar = new JPanel(); // right bar
-        whiteBar.setPreferredSize(new Dimension(pieceBarWidth, pieceBarLength));
-        whiteBar.setBackground(Color.LIGHT_GRAY);
-
-        JPanel blackBar = new JPanel(); // right bar
-        blackBar.setPreferredSize(new Dimension(pieceBarWidth, pieceBarLength));
-        blackBar.setBackground(Color.DARK_GRAY);
-
-        frame.add(blackBar, BorderLayout.WEST);
-        frame.add(whiteBar, BorderLayout.EAST);
-
-         */
 
         frame.add(board, BorderLayout.CENTER);
         frame.setResizable(true);

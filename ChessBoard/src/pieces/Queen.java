@@ -81,7 +81,7 @@ public class Queen extends Piece {
             validMoveSet[i] = tempValidMoveSet[i];
         }
 
-        Global.print1D(validMoveSet);
+        //Global.print1D(validMoveSet);
     }
 
     @Override

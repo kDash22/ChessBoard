@@ -85,7 +85,7 @@ public class Knight extends Piece{
         moveSet = new int[count][2];
         validMoveSet = new boolean[count];
 
-        System.out.println("\nKnight valid move count : "+count+"\n");
+        //System.out.println("\nKnight valid move count : "+count+"\n");
         int j = 0;
 
         for (int i = 0; i < 8; i++) {
@@ -98,8 +98,8 @@ public class Knight extends Piece{
         }
 
 
-        System.out.print("Knight : ");
-        Global.print1D(tempValidMoveSet);
+        //System.out.print("Knight : ");
+        //Global.print1D(tempValidMoveSet);
     }
 
     @Override
