@@ -68,7 +68,7 @@ public class Knight extends Piece{
                     if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
                             refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                         check = true;
-                        validMoveSet[i] = false;
+                        validMoveSet[i] = true; // Essential for check detection
 
                     } else {
                         validMoveSet[i] = true;

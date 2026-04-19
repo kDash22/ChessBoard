@@ -55,7 +55,7 @@ public class Rook extends Piece {
                         if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
                                 refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                             check = true;
-                            tempValidMoveSet[count] = false; // special check case
+                            tempValidMoveSet[count] = true; // Essential for check detection
                         } else {
                             tempValidMoveSet[count] = true;
                         }
