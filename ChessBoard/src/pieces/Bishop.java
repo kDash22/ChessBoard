@@ -73,13 +73,17 @@ public class Bishop extends Piece {
         moveSet = new int[count][2];
         validMoveSet = new boolean[count];
 
+        System.out.println("\nBishop valid move count : "+count+"\n");
         for (int i = 0; i < count; i++) {
             moveSet[i][0] = tempMoveSet[i][0];
             moveSet[i][1] = tempMoveSet[i][1];
             validMoveSet[i] = tempValidMoveSet[i];
         }
 
+        System.out.print("Bishop : ");
         Global.print1D(validMoveSet);
+        Global.print1D(tempValidMoveSet);
+
     }
 
     @Override
