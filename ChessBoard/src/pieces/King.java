@@ -1,5 +1,7 @@
 package pieces;
 
+import java.util.ArrayList;
+
 import board.ChessBoard;
 
 public class King extends Piece {
@@ -19,11 +21,9 @@ public class King extends Piece {
     @Override
     public void moveCheck(ChessBoard chessBoard) {
 
-
-        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
-            moveSet = null;
-            validMoveSet = null;
-            return;
+        // ALWAYS clear the list first to prevent duplicating old moves
+        if (validMoveList != null) {
+            validMoveList.clear();
         }
 
 
@@ -33,11 +33,6 @@ public class King extends Piece {
         Piece[][] refBoard = chessBoard.getBoard();
 
         // A King can have up to 8 moves + 2 for castling
-        int[][] tempMoveSet = new int[10][2];
-        boolean[] tempValidMoveSet = new boolean[10];
-        int count = 0;
-        int validMoveCount = 0;
-
         // All 8 directions
         int[][] directions = {
                 { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }, // Straight
@@ -50,84 +45,73 @@ public class King extends Piece {
 
             // Check if the square is available
             if (toRow >= 0 && toRow < 8 && toCol >= 0 && toCol < 8) {
-                tempMoveSet[count][0] = toRow;
-                tempMoveSet[count][1] = toCol;
+                Piece targetPiece = refBoard[toRow][toCol];
 
-                if (refBoard[toRow][toCol] == null) {
-                    // Empty square
-                    tempValidMoveSet[count] = true;
-                    validMoveCount++;
-                } else if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
-                    // Enemy piece
-                    tempValidMoveSet[count] = true;
-                    validMoveCount++;
-                } else {
-                    // Friendly piece
-                    tempValidMoveSet[count] = false;
+                if (targetPiece != null && targetPiece.getIdentification().isWhite() == getIdentification().isWhite()) {
+                    continue; 
                 }
+
+                if (targetPiece == null) {
+                    // Empty square
+                    validMoveList.add(new int[]{toRow,toCol});
+
+                } else if (targetPiece.getIdentification().isWhite() != getIdentification().isWhite()) {
+                    // Enemy piece 
+                    validMoveList.add(new int[]{toRow,toCol});
+                } 
+                
 
                 // King Proximity Rule
                 // Check if adjacent squares contain an enemy King
-                if (tempValidMoveSet[count]) {
-                    for (int dr = -1; dr <= 1; dr++) {
-                        for (int dc = -1; dc <= 1; dc++) {
-                            int adjRow = toRow + dr;
-                            int adjCol = toCol + dc;
-                            if (adjRow >= 0 && adjRow < 8 && adjCol >= 0 && adjCol < 8) {
-                                Piece adjPiece = refBoard[adjRow][adjCol];
-                                if (adjPiece instanceof King
-                                        && adjPiece.getIdentification().isWhite() != getIdentification().isWhite()) {
-                                    tempValidMoveSet[count] = false;
-                                    break;
-                                }
-                            }
+                boolean remove = false;
+                boolean tooCloseToEnemyKing = false;
+
+                outer:
+                for (int dr = -1; dr <= 1; dr++) {
+                    for (int dc = -1; dc <= 1; dc++) {
+
+                        int adjRow = toRow + dr;
+                        int adjCol = toCol + dc;
+
+                        if (adjRow < 0 || adjRow >= 8 || adjCol < 0 || adjCol >= 8) continue;
+
+                        Piece adjPiece = refBoard[adjRow][adjCol];
+
+                        if (adjPiece instanceof King
+                                && adjPiece.getIdentification().isWhite() != getIdentification().isWhite()) {
+
+                            remove = true;
+                            break outer;// no need to check further once we found the enemy King
                         }
-                        if (!tempValidMoveSet[count])
-                            break;
+
+                    }
+                        
+                }
+                if (!tooCloseToEnemyKing) {
+                    validMoveList.add(new int[]{toRow, toCol});
+                }
+            
+            }
+
+            // --- Castling Logic ---
+            if (!this.hasMoved() && !chessBoard.isKingInCheck(getIdentification().isWhite())) {
+
+                // King Side Castling
+                if (refBoard[row][7] instanceof Rook rook && !rook.hasMoved()) {
+                    if (refBoard[row][5] == null && refBoard[row][6] == null) {
+                        validMoveList.add(new int[]{row, 6});
                     }
                 }
-                count++;
-            }
-        }
-
-        // --- Castling Logic ---
-        if (!this.hasMoved() && !chessBoard.isKingInCheck(getIdentification().isWhite())) {
-            // King Side Castling
-            if (refBoard[row][7] instanceof Rook rook && !rook.hasMoved()) {
-                if (refBoard[row][5] == null && refBoard[row][6] == null) {
-                    tempMoveSet[count][0] = row;
-                    tempMoveSet[count][1] = 6;
-                    tempValidMoveSet[count] = true;
-                    validMoveCount++;
-                    count++;
-                }
-            }
-            // Queen Side Castling
-            if (refBoard[row][0] instanceof Rook rook && !rook.hasMoved()) {
-                if (refBoard[row][1] == null && refBoard[row][2] == null && refBoard[row][3] == null) {
-                    tempMoveSet[count][0] = row;
-                    tempMoveSet[count][1] = 2;
-                    tempValidMoveSet[count] = true;
-                    validMoveCount++;
-                    count++;
+                // Queen Side Castling
+                if (refBoard[row][0] instanceof Rook rook && !rook.hasMoved()) {
+                    if (refBoard[row][1] == null && refBoard[row][2] == null && refBoard[row][3] == null) {
+                        validMoveList.add(new int[]{row, 2});
+                    }
                 }
             }
         }
 
-        // Trim the arrays
-        moveSet = new int[validMoveCount][2];
-        validMoveSet = new boolean[validMoveCount];
-
-        int j = 0;
-
-        for (int i = 0; i < count; i++) {
-            if (tempValidMoveSet[i]) {
-                moveSet[j][0] = tempMoveSet[i][0];
-                moveSet[j][1] = tempMoveSet[i][1];
-                validMoveSet[j] = true;
-                j++;
-            }
-        }
+    
     }
 
     @Override

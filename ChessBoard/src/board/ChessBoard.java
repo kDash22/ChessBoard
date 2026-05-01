@@ -15,6 +15,8 @@ import java.util.List;
 
 public class ChessBoard extends JPanel {
 
+    private boolean isGameOver = false;
+
     private boolean immediateAction = false;//to check if the player has a special move in his immediate turn
 
     private boolean selection = false;
@@ -60,7 +62,7 @@ public class ChessBoard extends JPanel {
         int row = Piece.chessRowToIndex(chessRow);
         int col = Piece.chessColToIndex(chessCol);
         board[row][col] = piece;
-        setBoard(board);
+        
     }
 
 
@@ -125,6 +127,8 @@ public class ChessBoard extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
 
+                if (isGameOver) return; //stops mouse function if the game is over
+
                 selectPiece(e);
                 movePiece(e);
 
@@ -132,6 +136,7 @@ public class ChessBoard extends JPanel {
             }
         });
     }
+
 
     // animation-based flip
     private void flipBoard() {
@@ -263,28 +268,26 @@ public class ChessBoard extends JPanel {
 
     private void highlightValidSquare(Graphics2D g2d, Piece piece) {
 
-        piece.moveCheck(this);
-        boolean[] validMoveSet = piece.getValidMoveSet(this);
-        int[][] moveSet = piece.getMoveSet(this);
+        java.util.ArrayList<int[]> moveList = piece.getValidMoveList(this);
 
-        for (int i = 0; i < moveSet.length; i++) {
+        for (int i = 0; i < moveList.size(); i++) {
 
-            if (validMoveSet[i]) {
-                int row = moveSet[i][0];
-                int col = moveSet[i][1];
+            int[] square = moveList.get(i);
+            int row = square[0];
+            int col = square[1];
 
-                // bounds check
-                if (row < 0 || row >= 8 || col < 0 || col >= 8)
-                    continue;
-                if (board[row][col] != null) {
-                    g2d.setColor(new Color(255, 0, 0, 60));
-                } else {
-                    g2d.setColor(new Color(0, 255, 0, 60));
-                }
-
-                g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-
+            // bounds check
+            if (row < 0 || row >= 8 || col < 0 || col >= 8)
+                continue;
+            if (board[row][col] != null) {
+                g2d.setColor(new Color(255, 0, 0, 60));
+            } else {
+                g2d.setColor(new Color(0, 255, 0, 60));
             }
+
+            g2d.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+
 
         }
 
@@ -354,17 +357,14 @@ public class ChessBoard extends JPanel {
             Piece[][] refBoard = getBoard();
             Piece movingPiece = refBoard[selectedRow][selectedCol];
 
-            movingPiece.moveCheck(this);
-            int[][] moveSet = movingPiece.getMoveSet(this);
-            boolean[] validMoveset = movingPiece.getValidMoveSet(this);
+            java.util.ArrayList<int[]> moveList = movingPiece.getValidMoveList(this);
 
 
-            for (int i = 0; i < moveSet.length; i++){
+            for (int i = 0; i < moveList.size(); i++){
 
-                if (!validMoveset[i]) continue;
-
-                int r = moveSet[i][0];
-                int c = moveSet[i][1];
+                int[] square = moveList.get(i);
+                int r = square[0];
+                int c = square[1];
 
                 if (r == selectedToRow && c == selectedToCol){
 
@@ -497,7 +497,7 @@ public class ChessBoard extends JPanel {
 
                     repaint();//board refresh
                     flipBoard();//flips board after a successful move
-                    checkGameOver(!movingPiece.getIdentification().isWhite());
+                    checkGameOver(whiteToMove);
                     break;
                 }
 
@@ -557,51 +557,51 @@ public class ChessBoard extends JPanel {
     // a method which makes a new board with all the pieces
     public void makeNewBoard(){
 
-        Piece[][] emptyBoard = new Piece[8][8];
-        setBoard(emptyBoard);
-
-        //white pieces
-        Rook wR1 = new Rook('a',1,true,this);
-        Knight wN1 = new Knight('b',1,true,this);
-        Bishop wB1 = new Bishop('c',1,true,this);
-        Queen wQ  = new Queen('d',1,true,this);
-        King wK   = new King('e',1,true,this);
-        Bishop wB2 = new Bishop('f',1,true,this);
-        Knight wN2 = new Knight('g',1,true,this);
-        Rook wR2 = new Rook('h',1,true,this);
-
-        Pawn wP1 = new Pawn('a',2,true,this);
-        Pawn wP2 = new Pawn('b',2,true,this);
-        Pawn wP3 = new Pawn('c',2,true,this);
-        Pawn wP4 = new Pawn('d',2,true,this);
-        Pawn wP5 = new Pawn('e',2,true,this);
-        Pawn wP6 = new Pawn('f',2,true,this);
-        Pawn wP7 = new Pawn('g',2,true,this);
-        Pawn wP8 = new Pawn('h',2,true,this);
-
-        //black pieces
-        Rook bR1 = new Rook('a',8,false,this);
-        Knight bN1 = new Knight('b',8,false,this);
-        Bishop bB1 = new Bishop('c',8,false,this);
-        Queen bQ  = new Queen('d',8,false,this);
-        King bK   = new King('e',8,false,this);
-        Bishop bB2 = new Bishop('f',8,false,this);
-        Knight bN2 = new Knight('g',8,false,this);
-        Rook bR2 = new Rook('h',8,false,this);
-
-        Pawn bP1 = new Pawn('a',7,false,this);
-        Pawn bP2 = new Pawn('b',7,false,this);
-        Pawn bP3 = new Pawn('c',7,false,this);
-        Pawn bP4 = new Pawn('d',7,false,this);
-        Pawn bP5 = new Pawn('e',7,false,this);
-        Pawn bP6 = new Pawn('f',7,false,this);
-        Pawn bP7 = new Pawn('g',7,false,this);
-        Pawn bP8 = new Pawn('h',7,false,this);
+        board = new Piece[8][8];
+ 
+        // ----- White pieces -----
+        insertPiece('a', 1, new Rook('a', 1, true, this));
+        insertPiece('b', 1, new Knight('b', 1, true, this));
+        insertPiece('c', 1, new Bishop('c', 1, true, this));
+        insertPiece('d', 1, new Queen('d', 1, true, this));
+        insertPiece('e', 1, new King('e', 1, true, this));
+        insertPiece('f', 1, new Bishop('f', 1, true, this));
+        insertPiece('g', 1, new Knight('g', 1, true, this));
+        insertPiece('h', 1, new Rook('h', 1, true, this));
+ 
+        insertPiece('a', 2, new Pawn('a', 2, true, this));
+        insertPiece('b', 2, new Pawn('b', 2, true, this));
+        insertPiece('c', 2, new Pawn('c', 2, true, this));
+        insertPiece('d', 2, new Pawn('d', 2, true, this));
+        insertPiece('e', 2, new Pawn('e', 2, true, this));
+        insertPiece('f', 2, new Pawn('f', 2, true, this));
+        insertPiece('g', 2, new Pawn('g', 2, true, this));
+        insertPiece('h', 2, new Pawn('h', 2, true, this));
+ 
+        // ----- Black pieces -----
+        insertPiece('a', 8, new Rook('a', 8, false, this));
+        insertPiece('b', 8, new Knight('b', 8, false, this));
+        insertPiece('c', 8, new Bishop('c', 8, false, this));
+        insertPiece('d', 8, new Queen('d', 8, false, this));
+        insertPiece('e', 8, new King('e', 8, false, this));
+        insertPiece('f', 8, new Bishop('f', 8, false, this));
+        insertPiece('g', 8, new Knight('g', 8, false, this));
+        insertPiece('h', 8, new Rook('h', 8, false, this));
+ 
+        insertPiece('a', 7, new Pawn('a', 7, false, this));
+        insertPiece('b', 7, new Pawn('b', 7, false, this));
+        insertPiece('c', 7, new Pawn('c', 7, false, this));
+        insertPiece('d', 7, new Pawn('d', 7, false, this));
+        insertPiece('e', 7, new Pawn('e', 7, false, this));
+        insertPiece('f', 7, new Pawn('f', 7, false, this));
+        insertPiece('g', 7, new Pawn('g', 7, false, this));
+        insertPiece('h', 7, new Pawn('h', 7, false, this));
 
 
     }
     // Finds the current position of the King of the specified color
     public int[] findKing(boolean white) {
+
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
                 Piece p = board[r][c];
@@ -635,12 +635,30 @@ public class ChessBoard extends JPanel {
                             return true;
                         }
                     } else {
-                        p.moveCheck(this);
-                        int[][] moveSet = p.getMoveSet(this);
-                        boolean[] validMoves = p.getValidMoveSetRaw(); // We'll add this method to Piece
-                        if (moveSet != null){
-                            for (int i = 0; i < moveSet.length; i++) {
-                                if (validMoves[i] && moveSet[i][0] == row && moveSet[i][1] == col) {
+
+                        ArrayList<int[]> moveSet = p.getValidMoveListRaw(this);
+
+                        if (moveSet == null) continue;
+
+
+
+                        if (!moveSet.isEmpty()){
+                            for (int i = 0; i < moveSet.size(); i++) {
+
+                                int[] square = moveSet.get(i);
+
+                                if (square == null) continue;;
+
+                                // NEW: Guard against malformed arrays and print the culprit
+                                if (square.length < 2) {
+                                    System.out.println("CRITICAL ERROR: Array too short from piece at " + p.getChessCol() + p.getChessRow());
+                                    continue;
+                                }
+
+                                int r1 = square[0];
+                                int c1 = square[1];
+
+                                if (r1 == row && c1 == col) {
                                     return true;
                                 }
                             }
@@ -683,15 +701,16 @@ public class ChessBoard extends JPanel {
     // Checks if the specified color player has any legal moves left
     public boolean hasLegalMoves(boolean white) {
         Piece[][] refBoard = getBoard();
+
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
+
                 Piece p = refBoard[r][c];
                 if (p != null && p.getIdentification().isWhite() == white) {
-                    p.moveCheck(this);
-                    boolean[] moves = p.getValidMoveSet(this);
-                    for (boolean canMove : moves) {
-                        if (canMove) return true;
-                    }
+
+                    java.util.ArrayList<int []> moves = p.getValidMoveList(this);
+                    Global.printMoveList(moves);
+                    if (!moves.isEmpty()) return true;
                 }
             }
         }
@@ -700,18 +719,24 @@ public class ChessBoard extends JPanel {
 
     // Checks if the game is over and displays a message if so
     public void checkGameOver(boolean whiteTurn) {
+
         String color = whiteTurn ? "White" : "Black";
         System.out.println("Checking game over state for " + color + "...");
         
         if (!hasLegalMoves(whiteTurn)) {
             System.out.println("No legal moves found for " + color);
+
             if (isKingInCheck(whiteTurn)) {
+
                 String winner = whiteTurn ? "Black" : "White";
                 System.out.println("CHECKMATE! " + winner + " wins!");
                 JOptionPane.showMessageDialog(this, "CHECKMATE! " + winner + " wins!");
+
+                isGameOver = true;
             } else {
                 System.out.println("STALEMATE!");
                 JOptionPane.showMessageDialog(this, "STALEMATE! It's a draw.");
+                isGameOver = true;
             }
         } else if (isKingInCheck(whiteTurn)) {
              System.out.println(color + " is in Check!");
@@ -775,7 +800,7 @@ public class ChessBoard extends JPanel {
         System.out.println("----------------------------------------------------------------");
         Global.printArrayList(mg.generateMoves(chessBoard,false));
 
-        Global.printMoveSet(getBoard()[7][4].getMoveSet());
+        Global.printMoveList(getBoard()[7][4].getValidMoveList());
         Global.printValidMoveSet(getBoard()[7][4].getValidMoveSet());
 
          */

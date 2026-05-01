@@ -2,6 +2,9 @@ package pieces;
 
 import board.ChessBoard;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Knight extends Piece{
 
     private boolean check = false;//not decided how to implement checking yet this is just a placeholder
@@ -23,19 +26,17 @@ public class Knight extends Piece{
     @Override
     public void moveCheck(ChessBoard chessBoard) {
 
-        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
-            moveSet = null;
-            validMoveSet = null;
-            return;
+        // ALWAYS clear the list first to prevent duplicating old moves
+        if (validMoveList != null) {
+            validMoveList.clear();
         }
-
 
         int col = chessColToIndex(getChessCol());
         int row = Piece.chessRowToIndex(getChessRow());
 
         Piece[][] refBoard = chessBoard.getBoard();
 
-        int validCount = 0;//used to get valid move validCount
+        //int validCount = 0;//used to get valid move validCount
         //8 possible moves for a knight
         int[][] tempMoveSet = new int[][]{
                 {row + 2, col + 1}, {row + 2, col - 1},
@@ -43,20 +44,7 @@ public class Knight extends Piece{
                 {row + 1, col + 2}, {row + 1, col - 2},
                 {row - 1, col + 2}, {row - 1, col - 2}
         };
-        boolean[] tempValidMoveSet = new boolean[8];
 
-        //8 possible moves for a knight
-        int[] move1 = {row + 2, col + 1};
-        int[] move2 = {row + 2, col - 1};
-
-        int[] move3 = {row - 2, col + 1};
-        int[] move4 = {row - 2, col - 1};
-
-        int[] move5 = {row + 1, col + 2};
-        int[] move6 = {row + 1, col - 2};
-
-        int[] move7 = {row - 1, col + 2};
-        int[] move8 = {row - 1, col - 2};
 
         for(int i = 0 ; i < 8 ; i++  ){
 
@@ -65,57 +53,40 @@ public class Knight extends Piece{
 
             if (toCol < 8 && toCol >=0 && toRow < 8 && toRow >= 0 ){
 
+                Piece target = refBoard[toRow][toCol];
+
                 //if empty square
-                if (refBoard[toRow][toCol] == null){
-                    tempValidMoveSet[i] = true;
-                    validCount++;
+                if (target == null){
+                    validMoveList.add(new int[]{toRow,toCol});
+                    //tempValidMoveSet[i] = true;
+                    //validCount++;
                     continue;
                 }
-                //if it is an enemy piece, but if it is the enemy king the move is not allowed as king cannot be taken
-                if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
 
-                    if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
-                            refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
+                //if it is an enemy piece, but if it is the enemy king the move is not allowed as king cannot be taken
+                if (target.getIdentification().isWhite() != getIdentification().isWhite()) {
+
+                    if (target.getIdentification() == PieceIdentification.W_KING ||
+                            target.getIdentification() == PieceIdentification.B_KING) {
                         check = true;
-                        tempValidMoveSet[i] = true; // Essential for check detection
-                        validCount++;
+                        //tempValidMoveSet[i] = true; // Essential for check detection
+                        validMoveList.add(new int[]{toRow,toCol});
+                        //validCount++;
                     } else {
-                        tempValidMoveSet[i] = true;
-                        validCount++;
+                        //tempValidMoveSet[i] = true;
+                        //validCount++;
+                        validMoveList.add(new int[]{toRow,toCol});
                     }
-                } else {
-                    tempValidMoveSet[i] = false; // Blocked by own piece
                 }
             }
 
         }
-        moveSet = new int[validCount][2];
-        validMoveSet = new boolean[validCount];
-
-        int tempValidCount = 0;
-        for (boolean tempValid : tempValidMoveSet){
-            if (tempValid) tempValidCount++;
-        }
-        System.out.println("validcount : "+validCount+ "tempValidCount "+tempValidCount);
-
-        if (tempValidCount != validCount) throw new IllegalArgumentException("tempValidCount and validCount doesn't match ! " +
-                "tempValidCount : "+tempValidCount+"    validCount : "+validCount);
-
-        //System.out.println("\nKnight valid move validCount : "+validCount+"\n");
-        int j = 0;
-
-        for (int i = 0; i < 8; i++) {
-            if (tempValidMoveSet[i]) {
-                moveSet[j][0] = tempMoveSet[i][0];
-                moveSet[j][1] = tempMoveSet[i][1];
-                validMoveSet[j] = true;
-                j++;
-            }
-        }
-
+        //moveSet = new int[validCount][2];
+        //validMoveSet = new boolean[validCount];
 
         //System.out.print("Knight : ");
         //Global.print1D(tempValidMoveSet);
+
     }
 
     @Override

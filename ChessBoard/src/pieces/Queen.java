@@ -1,5 +1,8 @@
 package pieces;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import board.ChessBoard;
 
 public class Queen extends Piece {
@@ -23,10 +26,9 @@ public class Queen extends Piece {
     public void moveCheck(ChessBoard chessBoard) {
 
 
-        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
-            moveSet = null;
-            validMoveSet = null;
-            return;
+        // ALWAYS clear the list first to prevent duplicating old moves
+        if (validMoveList != null) {
+            validMoveList.clear();
         }
 
 
@@ -35,11 +37,7 @@ public class Queen extends Piece {
 
         Piece[][] refBoard = chessBoard.getBoard();
 
-        // A Queen can have up to 28 moves (14 straight + 14 diagonal)
-        int[][] tempMoveSet = new int[28][2];
-        boolean[] tempValidMoveSet = new boolean[28];
         int count = 0;
-        int validMoveCount = 0;//to keep track of valid moves for resizing the moveSet and validMoveSet arrays later
 
         // Combined 8 directions: Straight (Rook) + Diagonal (Bishop)
         int[][] directions = {
@@ -52,27 +50,22 @@ public class Queen extends Piece {
             int toCol = col + direction[1];
 
             while (toRow >= 0 && toRow < 8 && toCol >= 0 && toCol < 8) {
-                tempMoveSet[count][0] = toRow;
-                tempMoveSet[count][1] = toCol;
 
                 if (refBoard[toRow][toCol] == null) {
-                    tempValidMoveSet[count] = true;
+
+                    validMoveList.add(new int[]{toRow,toCol});
                     count++;
-                    validMoveCount++;
+                    
                 } else {
                     // Hit a piece - check if it's an enemy
                     if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
                         if (refBoard[toRow][toCol].getIdentification() == PieceIdentification.W_KING ||
                                 refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                             check = true;
-                            tempValidMoveSet[count] = true; // Essential for check detection
-                            validMoveCount++;
+                            validMoveList.add(new int[]{toRow,toCol});
                         } else {
-                            tempValidMoveSet[count] = true;
-                            validMoveCount++;   
+                            validMoveList.add(new int[]{toRow,toCol});
                         }
-                    } else {
-                        tempValidMoveSet[count] = false; // Blocked by own piece
                     }
                     count++;
                     break; // Stop sliding in this direction
@@ -83,19 +76,6 @@ public class Queen extends Piece {
             }
         }
 
-        // Trim arrays to the actual number of moves found
-        moveSet = new int[validMoveCount][2];
-        validMoveSet = new boolean[validMoveCount];
-        int j = 0;
-
-        for (int i = 0; i < count; i++) {
-            if (tempValidMoveSet[i]) {
-                moveSet[j][0] = tempMoveSet[i][0];
-                moveSet[j][1] = tempMoveSet[i][1];
-                validMoveSet[j] = true;
-                j++;
-            }
-        }
     }
 
     @Override

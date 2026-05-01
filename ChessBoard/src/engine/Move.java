@@ -1,11 +1,7 @@
 package engine;
 
-import Global.Global;
-import board.ChessBoard;
+import pieces.Pawn;
 import pieces.Piece;
-import pieces.PieceIdentification;
-
-import java.util.ArrayList;
 
 public class Move {
 
@@ -13,6 +9,12 @@ public class Move {
     int toCol, toRow;
 
     Piece movedPiece, capturedPiece;
+
+    //this is to ensure when a king or a rook is moved, the castling option stays unaccessible
+    boolean pieceHadMoved;
+
+    //to enable en passant if a pawn is pushed 2 squares
+    boolean isDoublePawnPush;
 
     public Move(char fromChessCol,int fromChessRow, char toChessCol,int toChessRow, Piece moved, Piece captured) {
 
@@ -22,6 +24,10 @@ public class Move {
         toCol = Piece.chessColToIndex(toChessCol);
         movedPiece = moved;
         capturedPiece = captured;
+
+        pieceHadMoved = moved.hasMoved();
+
+        isDoublePawnPush = (moved instanceof Pawn) && (Math.abs(toRow - fromRow) == 2);
     }
 
     public String toString(){

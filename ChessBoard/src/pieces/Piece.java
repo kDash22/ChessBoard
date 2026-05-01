@@ -2,10 +2,15 @@ package pieces;
 
 import board.ChessBoard;
 
+import java.util.ArrayList;
+
 public abstract class Piece {
 
-    protected boolean[] validMoveSet; // array to hold the valid moves
-    protected int[][] moveSet; // all moves of a piece
+    //protected boolean[] validMoveSet; // array to hold the valid moves
+
+
+    //protected int[][] moveSet; // all moves of a piece
+    protected ArrayList<int[]> validMoveList = new ArrayList<>();
     private Character chessCol; // column letter in the chessboard
     private int chessRow; // chessRow digit in the chessboard
     private PieceIdentification identification;// what piece it is and what team does it belong to
@@ -104,20 +109,24 @@ public abstract class Piece {
         return 8 - row;
     }
 
-    public boolean[] getValidMoveSet(ChessBoard chessBoard) {
+    // A version of getValidMoveSet that doesn't check for King safety to avoid infinite recursion
+    public ArrayList<int[]> getValidMoveListRaw(ChessBoard chessBoard) {
         moveCheck(chessBoard);
-        filterCheckMoves(chessBoard);
-        return validMoveSet;
+        return validMoveList;
     }
 
-    // A version of getValidMoveSet that doesn't check for King safety to avoid infinite recursion
-    public boolean[] getValidMoveSetRaw() {
-        return validMoveSet;
+    //A version with the check for King safety
+    public ArrayList<int[]> getValidMoveList(ChessBoard chessBoard) {
+        moveCheck(chessBoard);
+        filterCheckMoves(chessBoard);
+        return validMoveList;
     }
 
     // Validates each move in validMoveSet to ensure it doesn't leave the player's King in check
     protected void filterCheckMoves(ChessBoard chessBoard) {
-        if (validMoveSet == null) return;
+        if (validMoveList.isEmpty()) return;
+
+        ArrayList<int[]> filtered = new ArrayList<>(validMoveList);
 
         int originalRow = chessRowToIndex(getChessRow());
         int originalCol = chessColToIndex(getChessCol());
@@ -127,40 +136,50 @@ public abstract class Piece {
         boolean isWhite = getIdentification().isWhite();
         Piece[][] board = chessBoard.getBoard();
 
-        if (moveSet !=null){
-            for (int i = 0; i < moveSet.length; i++) {
-                if (validMoveSet[i]) {
-                    int toRow = moveSet[i][0];
-                    int toCol = moveSet[i][1];
+        for (int i = filtered.size() - 1; i >= 0; i--) {
 
-                    // Simulate the move
-                    Piece target = board[toRow][toCol];
-                    board[toRow][toCol] = this;
-                    board[originalRow][originalCol] = null;
+            int[] move = filtered.get(i);
+            int toRow = move[0];
+            int toCol = move[1];
 
-                    // Update internal coordinates so moveCheck() works correctly
-                    this.setChessCol(colToChessCol(toCol));
-                    this.setChessRow(rowToChessRow(toRow));
+            // Simulate the move
+            Piece target = board[toRow][toCol];
+            Piece enPassantTarget = null;
+            int enpassantCol = -1;
 
-                    // Check if King is safe
-                    if (chessBoard.isKingInCheck(isWhite)) {
-                        validMoveSet[i] = false;
-                    }
-
-                    // Undo the move
-                    this.setChessCol(originalColChar);
-                    this.setChessRow(originalRowInt);
-                    board[originalRow][originalCol] = this;
-                    board[toRow][toCol] = target;
-                }
+            if(this instanceof Pawn && target == null && toCol != originalCol) {
+                // This is an en passant move
+                enpassantCol = toCol;
+                enPassantTarget = board[originalRow][enpassantCol];
+                board[originalRow][enpassantCol] = null; // Temporarily remove the captured pawn
             }
+
+            board[toRow][toCol] = this;
+            board[originalRow][originalCol] = null;
+
+            // Update internal coordinates so moveCheck() works correctly
+            this.setChessCol(colToChessCol(toCol));
+            this.setChessRow(rowToChessRow(toRow));
+
+            // Check if King is safe
+            if (chessBoard.isKingInCheck(isWhite)) {
+                filtered.remove(i);
+            }
+
+            // Undo the move
+            this.setChessCol(originalColChar);
+            this.setChessRow(originalRowInt);
+
+            board[originalRow][originalCol] = this;
+            board[toRow][toCol] = target;
+
+            if (enPassantTarget != null) {
+                board[originalRow][enpassantCol] = enPassantTarget; // Restore the captured pawn    
+            }
+
         }
-    }
+        validMoveList = filtered;
 
-
-    public int[][] getMoveSet(ChessBoard chessBoard) {
-        moveCheck(chessBoard);
-        return moveSet;
     }
 
     public void updateCoords(char chessCol, int chessRow){

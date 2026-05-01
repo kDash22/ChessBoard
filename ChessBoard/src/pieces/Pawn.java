@@ -1,6 +1,10 @@
 package pieces;
 
 import board.ChessBoard;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import javax.swing.*;
 
 public class Pawn extends Piece{
@@ -30,10 +34,9 @@ public class Pawn extends Piece{
     public void moveCheck(ChessBoard chessBoard) {
 
 
-        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
-            moveSet = null;
-            validMoveSet = null;
-            return;
+        // ALWAYS clear the list first to prevent duplicating old moves
+        if (validMoveList != null) {
+            validMoveList.clear();
         }
 
 
@@ -45,6 +48,7 @@ public class Pawn extends Piece{
         //6 possible moves for pawn
         int[][] tempMoveSet;
         boolean[] tempValidMoveSet = new boolean[6];
+
         //direction is different for white and black so moveset has to be initiated differently
         if (getIdentification().isBlack()) {
 
@@ -73,13 +77,12 @@ public class Pawn extends Piece{
             int toRow = tempMoveSet[0][0];
             int toCol = tempMoveSet[0][1];
 
-            if (refBoard[toRow][toCol] != null) { //because the validMoveSet can be assumed to be filled with trues, we just flip it to false again if the move is blocked by another piece
+            if (refBoard[toRow][toCol] == null) { //because the validMoveSet can be assumed to be filled with trues, we just flip it to false again if the move is blocked by another piece
+                validMoveList.add(new int[]{toRow,toCol});
+            } else {
                 tempValidMoveSet[0] = false;
-
-                tempValidMoveSet[1] = false;//2 square move also gets blocked
-
+                tempValidMoveSet[1] = false; //if the 1 square move is blocked the 2 square move must also be blocked so we can flip it to false as well
             }
-
         }
 
         // 2 square move logic
@@ -88,13 +91,9 @@ public class Pawn extends Piece{
             int toCol = tempMoveSet[1][1];
 
             if (isOnStartingRow()) { //uses a method to see if the pawn is in the starting row
-                if (refBoard[toRow][toCol] != null) {
-                    tempValidMoveSet[1] = false; //flip the validMoveSet to false because it is as assumed the array is filled with trues
-
+                if (refBoard[toRow][toCol] == null) {
+                    validMoveList.add(new int[]{toRow,toCol});
                 }
-            } else {
-                tempValidMoveSet[1] = false; //the 2 square move not valid if the pawn is not in the starting row
-
             }
         }
 
@@ -103,29 +102,19 @@ public class Pawn extends Piece{
             int toRow2 = tempMoveSet[2][0]; // capture to the left
             int toCol2 = tempMoveSet[2][1];
 
-            if (refBoard[toRow2][toCol2] == null) { //if there is no piece is present in the left immediate diagonal pawn cannot move there
-                tempValidMoveSet[2] = false;
-
-            } else {
-
-                if (getIdentification().isWhite() == refBoard[toRow2][toCol2].getIdentification().isWhite()) { // must be an opponent piece
-                    tempValidMoveSet[2] = false;
-
+            if (refBoard[toRow2][toCol2] != null) { //if there is a piece present in the left immediate diagonal pawn can move there
+                if (getIdentification().isWhite() != refBoard[toRow2][toCol2].getIdentification().isWhite()) { // must be an opponent piece
+                    validMoveList.add(new int[]{toRow2,toCol2});
                 }
-            }
+            } 
         }
         if (tempValidMoveSet[3]){
             int toRow3 = tempMoveSet[3][0]; // capture to the right
             int toCol3 = tempMoveSet[3][1];
 
-            if (refBoard[toRow3][toCol3] == null) { //if there is no piece is present in the right immediate diagonal pawn cannot move there
-                tempValidMoveSet[3] = false;
-
-            } else {
-
-                if (getIdentification().isWhite() == refBoard[toRow3][toCol3].getIdentification().isWhite()) { // must be an opponent piece
-                    tempValidMoveSet[3] = false;
-
+            if (refBoard[toRow3][toCol3] != null) { //if there is a piece present in the right immediate diagonal pawn can move there
+                if (getIdentification().isWhite() != refBoard[toRow3][toCol3].getIdentification().isWhite()) { // must be an opponent piece
+                    validMoveList.add(new int[]{toRow3,toCol3});
                 }
             }
         }
@@ -141,10 +130,8 @@ public class Pawn extends Piece{
                     int targetRow = getIdentification().isWhite() ? row - 1 : row + 1;
                     int targetCol = col - 1;
                     if (refBoard[targetRow][targetCol] == null) {
-                        tempMoveSet[4][0] = targetRow;
-                        tempMoveSet[4][1] = targetCol;
+                        validMoveList.add(new int[]{targetRow,targetCol});
                         tempValidMoveSet[4] = true;
-
                     }
                 }
             }
@@ -160,8 +147,7 @@ public class Pawn extends Piece{
                     int targetRow = getIdentification().isWhite() ? row - 1 : row + 1;
                     int targetCol = col + 1;
                     if (refBoard[targetRow][targetCol] == null) {
-                        tempMoveSet[5][0] = targetRow;
-                        tempMoveSet[5][1] = targetCol;
+                        validMoveList.add(new int[]{targetRow,targetCol});
                         tempValidMoveSet[5] = true;
 
                     }
@@ -169,29 +155,19 @@ public class Pawn extends Piece{
             }
         }
 
+        /* 
         int count = 0; //the total valid move number
         for (int i = 0; i < 6; i++) {
             if (tempValidMoveSet[i]) {
                 count++;
             }
-        }
-        moveSet = new int[count][2];
-        validMoveSet = new boolean[count];
+        } */
 
         //System.out.println("\nPawn valid move count : "+count+"\n");
-        int j = 0;
-
-        for (int i = 0; i < 6; i++) {
-            if (tempValidMoveSet[i]) {
-                moveSet[j][0] = tempMoveSet[i][0];
-                moveSet[j][1] = tempMoveSet[i][1];
-                validMoveSet[j] = true;
-                j++;
-            }
-        }
 
         //System.out.print("Pawn : ");
         //Global.print1D(tempValidMoveSet);
+
 
     }
 

@@ -3,6 +3,8 @@ package Global;
 import board.ChessBoard;
 import pieces.Piece;
 
+import java.util.ArrayList;
+
 public class Global {
 
     public static void print2D(Object[][] arr) {
@@ -47,19 +49,19 @@ public class Global {
         System.out.println();
     }
 
-    public static void printMoveSet(int[][] moveSet){
+    public static void printMoveList(ArrayList<int[]> moveList){
 
-        if (moveSet == null){
+        if (moveList.isEmpty()){
             System.out.println("There are no valid moves ! ");
             return;
         }
 
-        for (int[] move : moveSet) {
+        for (int[] move : moveList) {
             char chessCol = Piece.colToChessCol(move[1]);
             int chessRow = Piece.rowToChessRow(move[0]);
             System.out.print(chessCol +" "+ chessRow + ", ");
         }
-        System.out.println("number of moves : "+moveSet.length);
+        System.out.println("number of moves : "+moveList.size());
     }
 
     public static void printValidMoveSet(boolean[] validMoveSet){
@@ -89,7 +91,7 @@ public class Global {
 
                     refBoard[i][j].moveCheck(chessBoard);
                     System.out.print(refBoard[i][j]);
-                    Global.printMoveSet(refBoard[i][j].getMoveSet(chessBoard));
+                    Global.printMoveList(refBoard[i][j].getValidMoveList(chessBoard));
                 }
             }
         }
