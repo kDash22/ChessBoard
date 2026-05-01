@@ -1,6 +1,5 @@
 package pieces;
 
-import Global.Global;
 import board.ChessBoard;
 
 public class Queen extends Piece {
@@ -8,7 +7,7 @@ public class Queen extends Piece {
     private static final int PIECE_VALUE = 9;
     private boolean check = false;
 
-    public Queen(Character chessCol, int chessRow, boolean white) {
+    public Queen(Character chessCol, int chessRow, boolean white,ChessBoard chessBoard) {
         setChessCol(chessCol);
         setChessRow(chessRow);
 
@@ -17,20 +16,30 @@ public class Queen extends Piece {
         } else {
             setIdentification(PieceIdentification.B_QUEEN);
         }
-        ChessBoard.insertPiece(chessCol, chessRow, this);
+        chessBoard.insertPiece(chessCol, chessRow, this);
     }
 
     @Override
-    public void moveCheck() {
+    public void moveCheck(ChessBoard chessBoard) {
+
+
+        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
+            moveSet = null;
+            validMoveSet = null;
+            return;
+        }
+
+
         int col = chessColToIndex(getChessCol());
         int row = Piece.chessRowToIndex(getChessRow());
 
-        Piece[][] refBoard = ChessBoard.getBoard();
+        Piece[][] refBoard = chessBoard.getBoard();
 
         // A Queen can have up to 28 moves (14 straight + 14 diagonal)
         int[][] tempMoveSet = new int[28][2];
         boolean[] tempValidMoveSet = new boolean[28];
         int count = 0;
+        int validMoveCount = 0;//to keep track of valid moves for resizing the moveSet and validMoveSet arrays later
 
         // Combined 8 directions: Straight (Rook) + Diagonal (Bishop)
         int[][] directions = {
@@ -49,6 +58,7 @@ public class Queen extends Piece {
                 if (refBoard[toRow][toCol] == null) {
                     tempValidMoveSet[count] = true;
                     count++;
+                    validMoveCount++;
                 } else {
                     // Hit a piece - check if it's an enemy
                     if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
@@ -56,8 +66,10 @@ public class Queen extends Piece {
                                 refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                             check = true;
                             tempValidMoveSet[count] = true; // Essential for check detection
+                            validMoveCount++;
                         } else {
                             tempValidMoveSet[count] = true;
+                            validMoveCount++;   
                         }
                     } else {
                         tempValidMoveSet[count] = false; // Blocked by own piece
@@ -72,16 +84,18 @@ public class Queen extends Piece {
         }
 
         // Trim arrays to the actual number of moves found
-        moveSet = new int[count][2];
-        validMoveSet = new boolean[count];
+        moveSet = new int[validMoveCount][2];
+        validMoveSet = new boolean[validMoveCount];
+        int j = 0;
 
         for (int i = 0; i < count; i++) {
-            moveSet[i][0] = tempMoveSet[i][0];
-            moveSet[i][1] = tempMoveSet[i][1];
-            validMoveSet[i] = tempValidMoveSet[i];
+            if (tempValidMoveSet[i]) {
+                moveSet[j][0] = tempMoveSet[i][0];
+                moveSet[j][1] = tempMoveSet[i][1];
+                validMoveSet[j] = true;
+                j++;
+            }
         }
-
-        //Global.print1D(validMoveSet);
     }
 
     @Override
@@ -90,7 +104,12 @@ public class Queen extends Piece {
     }
 
     @Override
-    public String toString() {
-        return "Queen";
+    public String toString(){
+        if (getIdentification().isWhite())
+            return " wQ ";
+        else
+            return " bQ ";
+
+
     }
 }

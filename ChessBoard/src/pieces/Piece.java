@@ -104,9 +104,9 @@ public abstract class Piece {
         return 8 - row;
     }
 
-    public boolean[] getValidMoveSet() {
-        moveCheck();
-        filterCheckMoves();
+    public boolean[] getValidMoveSet(ChessBoard chessBoard) {
+        moveCheck(chessBoard);
+        filterCheckMoves(chessBoard);
         return validMoveSet;
     }
 
@@ -116,7 +116,7 @@ public abstract class Piece {
     }
 
     // Validates each move in validMoveSet to ensure it doesn't leave the player's King in check
-    protected void filterCheckMoves() {
+    protected void filterCheckMoves(ChessBoard chessBoard) {
         if (validMoveSet == null) return;
 
         int originalRow = chessRowToIndex(getChessRow());
@@ -125,44 +125,51 @@ public abstract class Piece {
         int originalRowInt = getChessRow();
         
         boolean isWhite = getIdentification().isWhite();
-        Piece[][] board = ChessBoard.getBoard();
+        Piece[][] board = chessBoard.getBoard();
 
-        for (int i = 0; i < moveSet.length; i++) {
-            if (validMoveSet[i]) {
-                int toRow = moveSet[i][0];
-                int toCol = moveSet[i][1];
+        if (moveSet !=null){
+            for (int i = 0; i < moveSet.length; i++) {
+                if (validMoveSet[i]) {
+                    int toRow = moveSet[i][0];
+                    int toCol = moveSet[i][1];
 
-                // Simulate the move
-                Piece target = board[toRow][toCol];
-                board[toRow][toCol] = this;
-                board[originalRow][originalCol] = null;
-                
-                // Update internal coordinates so moveCheck() works correctly
-                this.setChessCol(colToChessCol(toCol));
-                this.setChessRow(rowToChessRow(toRow));
+                    // Simulate the move
+                    Piece target = board[toRow][toCol];
+                    board[toRow][toCol] = this;
+                    board[originalRow][originalCol] = null;
 
-                // Check if King is safe
-                if (ChessBoard.isKingInCheck(isWhite)) {
-                    validMoveSet[i] = false;
+                    // Update internal coordinates so moveCheck() works correctly
+                    this.setChessCol(colToChessCol(toCol));
+                    this.setChessRow(rowToChessRow(toRow));
+
+                    // Check if King is safe
+                    if (chessBoard.isKingInCheck(isWhite)) {
+                        validMoveSet[i] = false;
+                    }
+
+                    // Undo the move
+                    this.setChessCol(originalColChar);
+                    this.setChessRow(originalRowInt);
+                    board[originalRow][originalCol] = this;
+                    board[toRow][toCol] = target;
                 }
-
-                // Undo the move
-                this.setChessCol(originalColChar);
-                this.setChessRow(originalRowInt);
-                board[originalRow][originalCol] = this;
-                board[toRow][toCol] = target;
             }
         }
     }
 
 
-    public int[][] getMoveSet() {
-        moveCheck();
+    public int[][] getMoveSet(ChessBoard chessBoard) {
+        moveCheck(chessBoard);
         return moveSet;
     }
 
+    public void updateCoords(char chessCol, int chessRow){
+        setChessCol(chessCol);
+        setChessRow(chessRow);
+
+    }
     // checking the available moves
-    public abstract void moveCheck();
+    public abstract void moveCheck(ChessBoard chessBoard);
 
     public abstract void movePiece();
 

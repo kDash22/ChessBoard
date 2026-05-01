@@ -1,11 +1,10 @@
 package pieces;
 
-import Global.Global;
 import board.ChessBoard;
 
 public class King extends Piece {
 
-    public King(Character chessCol, int chessRow, boolean white) {
+    public King(Character chessCol, int chessRow, boolean white,ChessBoard chessBoard) {
         setChessCol(chessCol);
         setChessRow(chessRow);
 
@@ -14,20 +13,30 @@ public class King extends Piece {
         } else {
             setIdentification(PieceIdentification.B_KING);
         }
-        ChessBoard.insertPiece(chessCol, chessRow, this);
+        chessBoard.insertPiece(chessCol, chessRow, this);
     }
 
     @Override
-    public void moveCheck() {
+    public void moveCheck(ChessBoard chessBoard) {
+
+
+        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
+            moveSet = null;
+            validMoveSet = null;
+            return;
+        }
+
+
         int col = chessColToIndex(getChessCol());
         int row = Piece.chessRowToIndex(getChessRow());
 
-        Piece[][] refBoard = ChessBoard.getBoard();
+        Piece[][] refBoard = chessBoard.getBoard();
 
         // A King can have up to 8 moves + 2 for castling
         int[][] tempMoveSet = new int[10][2];
         boolean[] tempValidMoveSet = new boolean[10];
         int count = 0;
+        int validMoveCount = 0;
 
         // All 8 directions
         int[][] directions = {
@@ -47,9 +56,11 @@ public class King extends Piece {
                 if (refBoard[toRow][toCol] == null) {
                     // Empty square
                     tempValidMoveSet[count] = true;
+                    validMoveCount++;
                 } else if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
                     // Enemy piece
                     tempValidMoveSet[count] = true;
+                    validMoveCount++;
                 } else {
                     // Friendly piece
                     tempValidMoveSet[count] = false;
@@ -80,13 +91,14 @@ public class King extends Piece {
         }
 
         // --- Castling Logic ---
-        if (!this.hasMoved() && !ChessBoard.isKingInCheck(getIdentification().isWhite())) {
+        if (!this.hasMoved() && !chessBoard.isKingInCheck(getIdentification().isWhite())) {
             // King Side Castling
             if (refBoard[row][7] instanceof Rook rook && !rook.hasMoved()) {
                 if (refBoard[row][5] == null && refBoard[row][6] == null) {
                     tempMoveSet[count][0] = row;
                     tempMoveSet[count][1] = 6;
                     tempValidMoveSet[count] = true;
+                    validMoveCount++;
                     count++;
                 }
             }
@@ -96,22 +108,26 @@ public class King extends Piece {
                     tempMoveSet[count][0] = row;
                     tempMoveSet[count][1] = 2;
                     tempValidMoveSet[count] = true;
+                    validMoveCount++;
                     count++;
                 }
             }
         }
 
         // Trim the arrays
-        moveSet = new int[count][2];
-        validMoveSet = new boolean[count];
+        moveSet = new int[validMoveCount][2];
+        validMoveSet = new boolean[validMoveCount];
+
+        int j = 0;
 
         for (int i = 0; i < count; i++) {
-            moveSet[i][0] = tempMoveSet[i][0];
-            moveSet[i][1] = tempMoveSet[i][1];
-            validMoveSet[i] = tempValidMoveSet[i];
+            if (tempValidMoveSet[i]) {
+                moveSet[j][0] = tempMoveSet[i][0];
+                moveSet[j][1] = tempMoveSet[i][1];
+                validMoveSet[j] = true;
+                j++;
+            }
         }
-
-        //Global.print1D(validMoveSet);
     }
 
     @Override
@@ -120,7 +136,12 @@ public class King extends Piece {
     }
 
     @Override
-    public String toString() {
-        return "King";
+    public String toString(){
+        if (getIdentification().isWhite())
+            return " wK ";
+        else
+            return " bK ";
+
+
     }
 }

@@ -1,6 +1,5 @@
 package pieces;
 
-import Global.Global;
 import board.ChessBoard;
 
 public class Knight extends Piece{
@@ -8,7 +7,7 @@ public class Knight extends Piece{
     private boolean check = false;//not decided how to implement checking yet this is just a placeholder
     private static final int PIECE_VALUE = 3;
 
-    public Knight(Character chessCol, int chessRow, boolean white){
+    public Knight(Character chessCol, int chessRow, boolean white,ChessBoard chessBoard){
         setChessCol(chessCol);
         setChessRow(chessRow);
 
@@ -17,18 +16,26 @@ public class Knight extends Piece{
         } else {
             setIdentification(PieceIdentification.B_KNIGHT);
         }
-        ChessBoard.insertPiece(chessCol, chessRow, this);
+        chessBoard.insertPiece(chessCol, chessRow, this);
 
     }
 
     @Override
-    public void moveCheck() {
+    public void moveCheck(ChessBoard chessBoard) {
+
+        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
+            moveSet = null;
+            validMoveSet = null;
+            return;
+        }
+
+
         int col = chessColToIndex(getChessCol());
         int row = Piece.chessRowToIndex(getChessRow());
 
-        Piece[][] refBoard = ChessBoard.getBoard();
+        Piece[][] refBoard = chessBoard.getBoard();
 
-        int count = 0;//used to get valid move count
+        int validCount = 0;//used to get valid move validCount
         //8 possible moves for a knight
         int[][] tempMoveSet = new int[][]{
                 {row + 2, col + 1}, {row + 2, col - 1},
@@ -61,7 +68,7 @@ public class Knight extends Piece{
                 //if empty square
                 if (refBoard[toRow][toCol] == null){
                     tempValidMoveSet[i] = true;
-                    count++;
+                    validCount++;
                     continue;
                 }
                 //if it is an enemy piece, but if it is the enemy king the move is not allowed as king cannot be taken
@@ -71,10 +78,10 @@ public class Knight extends Piece{
                             refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                         check = true;
                         tempValidMoveSet[i] = true; // Essential for check detection
-                        count++;
+                        validCount++;
                     } else {
                         tempValidMoveSet[i] = true;
-                        count++;
+                        validCount++;
                     }
                 } else {
                     tempValidMoveSet[i] = false; // Blocked by own piece
@@ -82,10 +89,19 @@ public class Knight extends Piece{
             }
 
         }
-        moveSet = new int[count][2];
-        validMoveSet = new boolean[count];
+        moveSet = new int[validCount][2];
+        validMoveSet = new boolean[validCount];
 
-        //System.out.println("\nKnight valid move count : "+count+"\n");
+        int tempValidCount = 0;
+        for (boolean tempValid : tempValidMoveSet){
+            if (tempValid) tempValidCount++;
+        }
+        System.out.println("validcount : "+validCount+ "tempValidCount "+tempValidCount);
+
+        if (tempValidCount != validCount) throw new IllegalArgumentException("tempValidCount and validCount doesn't match ! " +
+                "tempValidCount : "+tempValidCount+"    validCount : "+validCount);
+
+        //System.out.println("\nKnight valid move validCount : "+validCount+"\n");
         int j = 0;
 
         for (int i = 0; i < 8; i++) {
@@ -109,7 +125,12 @@ public class Knight extends Piece{
 
     @Override
     public String toString(){
-        return "Knight";
+        if (getIdentification().isWhite())
+            return " wN ";
+        else
+            return " bN ";
+
+
     }
 
 }

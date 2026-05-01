@@ -1,6 +1,5 @@
 package pieces;
 
-import Global.Global;
 import board.ChessBoard;
 import javax.swing.*;
 
@@ -13,7 +12,7 @@ public class Pawn extends Piece{
     private boolean enPassantVulnerable = false; // set only when this pawn actually double-stepped
     private boolean enPassantAllowed = false; //if this pawn is allowed to en passant an opponent pawn
 
-    public Pawn(Character chessCol, int chessRow, boolean white){
+    public Pawn(Character chessCol, int chessRow, boolean white, ChessBoard chessBoard){
         setChessCol(chessCol);
         setChessRow(chessRow);
 
@@ -22,18 +21,26 @@ public class Pawn extends Piece{
         else
             setIdentification(PieceIdentification.B_PAWN);
 
-        ChessBoard.insertPiece(chessCol,chessRow,this);
+        chessBoard.insertPiece(chessCol,chessRow,this);
 
     }
 
 
     @Override
-    public void moveCheck() {
+    public void moveCheck(ChessBoard chessBoard) {
+
+
+        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
+            moveSet = null;
+            validMoveSet = null;
+            return;
+        }
+
 
         int col = chessColToIndex(getChessCol());
         int row = Piece.chessRowToIndex(getChessRow());
 
-        Piece[][] refBoard = ChessBoard.getBoard();
+        Piece[][] refBoard = chessBoard.getBoard();
 
         //6 possible moves for pawn
         int[][] tempMoveSet;
@@ -195,7 +202,12 @@ public class Pawn extends Piece{
 
     @Override
     public String toString(){
-        return "Pawn";
+        if (getIdentification().isWhite())
+            return " wP ";
+        else
+            return " bP ";
+
+
     }
 
     //a method used to check if the pawn is in the starting row
@@ -212,10 +224,10 @@ public class Pawn extends Piece{
     }
 
     // a method used to check if a pawn can be taken using en passant
-    public boolean[] enPassantDangerCheck(){
+    public boolean[] enPassantDangerCheck(ChessBoard chessBoard){
 
         int dangerRow ; //the row where an en passant could happen, different for white and black pieces
-        Piece[][] refBoard = ChessBoard.getBoard();
+        Piece[][] refBoard = chessBoard.getBoard();
         int col = chessColToIndex(getChessCol());
 
         if(getIdentification().isWhite()){ // if white
@@ -266,11 +278,11 @@ public class Pawn extends Piece{
     }
 
     // a method used to promote a pawn
-    public void promote(){
+    public void promote(ChessBoard chessBoard){
 
         int lastRow ;//last row differs for white and black
         boolean isWhite = false;//to check what color the pawn is
-        Piece[][] refBoard = ChessBoard.getBoard();
+        Piece[][] refBoard = chessBoard.getBoard();
 
         if(getIdentification().isWhite()){
             lastRow = 0;//for white last row is 0 as white moves 7 -> 0
@@ -304,22 +316,22 @@ public class Pawn extends Piece{
 
                 switch (choice){ //the promotions
                     case 0 :
-                        refBoard[lastRow][i] = new Knight(colToChessCol(i),rowToChessRow(lastRow),isWhite);
+                        refBoard[lastRow][i] = new Knight(colToChessCol(i),rowToChessRow(lastRow),isWhite,chessBoard);
                         break;
                     case 1 :
-                        refBoard[lastRow][i] = new Bishop(colToChessCol(i),rowToChessRow(lastRow),isWhite);
+                        refBoard[lastRow][i] = new Bishop(colToChessCol(i),rowToChessRow(lastRow),isWhite,chessBoard);
                         break;
                     case 2 :
-                        refBoard[lastRow][i] = new Rook(colToChessCol(i),rowToChessRow(lastRow),isWhite);
+                        refBoard[lastRow][i] = new Rook(colToChessCol(i),rowToChessRow(lastRow),isWhite,chessBoard);
                         break;
                     case 3 :
-                        refBoard[lastRow][i] = new Queen(colToChessCol(i),rowToChessRow(lastRow),isWhite);
+                        refBoard[lastRow][i] = new Queen(colToChessCol(i),rowToChessRow(lastRow),isWhite,chessBoard);
                         break;
                     default :
-                        refBoard[lastRow][i] = new Queen(colToChessCol(i),rowToChessRow(lastRow),isWhite);
+                        refBoard[lastRow][i] = new Queen(colToChessCol(i),rowToChessRow(lastRow),isWhite,chessBoard);
                 }
 
-                ChessBoard.setBoard(refBoard);//the board is updated
+                chessBoard.setBoard(refBoard);//the board is updated
 
             }
         }

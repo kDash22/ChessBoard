@@ -1,5 +1,7 @@
 package board;
 
+import Global.Global;
+import engine.MoveGenerator;
 import pieces.*;
 
 import javax.swing.*;
@@ -19,7 +21,7 @@ public class ChessBoard extends JPanel {
     private int selectedRow = -1; //to get the row of the selected piece
     private int selectedCol = -1; //to get the column of the selected piece
 
-    private List<Piece> capturedByWhite = new ArrayList<>(); 
+    private List<Piece> capturedByWhite = new ArrayList<>();
     private List<Piece> capturedByBlack= new ArrayList<>();
 
     private int selectedToRow = -1; //to get the row of the square that the piece is going to move to
@@ -30,7 +32,9 @@ public class ChessBoard extends JPanel {
     private final static int pieceBarWidth = 240;
     private final static int pieceBarLength = 640;
 
-    private boolean flipped = false;
+    private boolean flipped = false;//board gui state, white to move is false
+    private boolean whiteToMove = true;//white's turn to move
+
 
     private double angle = 0;
     private double targetAngle = 0;
@@ -40,22 +44,21 @@ public class ChessBoard extends JPanel {
     private Image wPawn, wKnight, wBishop, wRook, wQueen, wKing,
             bPawn, bKnight, bBishop, bRook, bQueen, bKing;
 
-    private static Piece[][] board = new Piece[8][8]; //[row][col]
+    private Piece[][] board = new Piece[8][8]; //[row][col]
 
     public static final List<Character> COLUMN_LETTERS = List.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
 
-    public static Piece[][] getBoard() {
+    public  Piece[][] getBoard() {
         return board;
     }
 
-    public static void setBoard(Piece[][] board) {
-        ChessBoard.board = board;
+    public void setBoard(Piece[][] board) {
+        this.board = board;
     }
 
-    public static void insertPiece(Character chessCol, int chessRow, Piece piece) {
+    public void insertPiece(Character chessCol, int chessRow, Piece piece) {
         int row = Piece.chessRowToIndex(chessRow);
         int col = Piece.chessColToIndex(chessCol);
-        Piece[][] board = getBoard();
         board[row][col] = piece;
         setBoard(board);
     }
@@ -101,13 +104,13 @@ public class ChessBoard extends JPanel {
             int w = piece.getWidth(null);
             int h = piece.getHeight(null);
 
-            BufferedImage flipped = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = flipped.createGraphics();
+            BufferedImage flippedPiece = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = flippedPiece.createGraphics();
 
             g2d.drawImage(piece, w, h, -w, -h, null);
             g2d.dispose();
 
-            return flipped;
+            return flippedPiece;
         }
         return null;
     }
@@ -139,6 +142,7 @@ public class ChessBoard extends JPanel {
         rotating = true; // rotation lock, blocks any new rotations
 
         flipped = !flipped;
+        whiteToMove = !whiteToMove;
 
         targetAngle = flipped ? Math.PI : 0.0;
 
@@ -259,10 +263,9 @@ public class ChessBoard extends JPanel {
 
     private void highlightValidSquare(Graphics2D g2d, Piece piece) {
 
-        piece.moveCheck();
-
-        boolean[] validMoveSet = piece.getValidMoveSet();
-        int[][] moveSet = piece.getMoveSet();
+        piece.moveCheck(this);
+        boolean[] validMoveSet = piece.getValidMoveSet(this);
+        int[][] moveSet = piece.getMoveSet(this);
 
         for (int i = 0; i < moveSet.length; i++) {
 
@@ -309,14 +312,14 @@ public class ChessBoard extends JPanel {
 
         if (refBoard[row][col] != null) {
 
-            if (refBoard[row][col].getIdentification().isWhite() && !flipped) {
+            if (refBoard[row][col].getIdentification().isWhite() && whiteToMove) {
                 selection = true;
                 selectedCol = col;
                 selectedRow = row;
                 repaint();
             }
 
-            if (refBoard[row][col].getIdentification().isBlack() && flipped){
+            if (refBoard[row][col].getIdentification().isBlack() && !whiteToMove){
                 selection = true;
                 selectedCol = col;
                 selectedRow = row;
@@ -350,8 +353,10 @@ public class ChessBoard extends JPanel {
 
             Piece[][] refBoard = getBoard();
             Piece movingPiece = refBoard[selectedRow][selectedCol];
-            int[][] moveSet = movingPiece.getMoveSet();
-            boolean[] validMoveset = movingPiece.getValidMoveSet();
+
+            movingPiece.moveCheck(this);
+            int[][] moveSet = movingPiece.getMoveSet(this);
+            boolean[] validMoveset = movingPiece.getValidMoveSet(this);
 
 
             for (int i = 0; i < moveSet.length; i++){
@@ -384,10 +389,10 @@ public class ChessBoard extends JPanel {
 
                         int enPassantRow ; //the row en passant happens differs for white and black
 
-                        if (flipped){ //flipped = black's turn
-                           enPassantRow = 4;
+                        if (whiteToMove){
+                           enPassantRow = 3;
                         } else {
-                            enPassantRow = 3;
+                            enPassantRow = 4;
                         }
 
                         for (int j = 0; j<8 ; j++){ //checks the whole en passant row
@@ -470,7 +475,7 @@ public class ChessBoard extends JPanel {
                     //if a pawn is getting promoted check
                     if (PieceIdentification.isPawn(movingPiece)  ){
                         Pawn p = (Pawn) movingPiece;
-                        p.promote();//automatically sets the board in the method
+                        p.promote(this);//automatically sets the board in the method
 
                         //checks if a pawn can be in en passant danger
                         if ((p.getIdentification().isWhite() && selectedToRow == selectedRow-2)
@@ -478,7 +483,7 @@ public class ChessBoard extends JPanel {
 
                             p.setEnPassantVulnerable(true); //flag set only on actual double-step
 
-                            boolean[] enPassantDanger = p.enPassantDangerCheck(); //checking if there is opponent pawns that can jump to the oppotunity
+                            boolean[] enPassantDanger = p.enPassantDangerCheck(this); //checking if there is opponent pawns that can jump to the oppotunity
                             if (enPassantDanger[0] || enPassantDanger[1]){
                                 immediateAction = true;//sets the special move check for next turn to be true
                             }
@@ -503,6 +508,10 @@ public class ChessBoard extends JPanel {
 
 
         }
+        /*
+        System.out.println("\nflipped : "+flipped);
+        System.out.println("is white to move : "+isWhiteToMove()); */
+
 
     }
 
@@ -552,51 +561,50 @@ public class ChessBoard extends JPanel {
         setBoard(emptyBoard);
 
         //white pieces
-        Rook wR1 = new Rook('a',1,true);
-        Knight wN1 = new Knight('b',1,true);
-        Bishop wB1 = new Bishop('c',1,true);
-        Queen wQ  = new Queen('d',1,true);
-        King wK   = new King('e',1,true);
-        Bishop wB2 = new Bishop('f',1,true);
-        Knight wN2 = new Knight('g',1,true);
-        Rook wR2 = new Rook('h',1,true);
+        Rook wR1 = new Rook('a',1,true,this);
+        Knight wN1 = new Knight('b',1,true,this);
+        Bishop wB1 = new Bishop('c',1,true,this);
+        Queen wQ  = new Queen('d',1,true,this);
+        King wK   = new King('e',1,true,this);
+        Bishop wB2 = new Bishop('f',1,true,this);
+        Knight wN2 = new Knight('g',1,true,this);
+        Rook wR2 = new Rook('h',1,true,this);
 
-        Pawn wP1 = new Pawn('a',2,true);
-        Pawn wP2 = new Pawn('b',2,true);
-        Pawn wP3 = new Pawn('c',2,true);
-        Pawn wP4 = new Pawn('d',2,true);
-        Pawn wP5 = new Pawn('e',2,true);
-        Pawn wP6 = new Pawn('f',2,true);
-        Pawn wP7 = new Pawn('g',2,true);
-        Pawn wP8 = new Pawn('h',2,true);
+        Pawn wP1 = new Pawn('a',2,true,this);
+        Pawn wP2 = new Pawn('b',2,true,this);
+        Pawn wP3 = new Pawn('c',2,true,this);
+        Pawn wP4 = new Pawn('d',2,true,this);
+        Pawn wP5 = new Pawn('e',2,true,this);
+        Pawn wP6 = new Pawn('f',2,true,this);
+        Pawn wP7 = new Pawn('g',2,true,this);
+        Pawn wP8 = new Pawn('h',2,true,this);
 
         //black pieces
-        Rook bR1 = new Rook('a',8,false);
-        Knight bN1 = new Knight('b',8,false);
-        Bishop bB1 = new Bishop('c',8,false);
-        Queen bQ  = new Queen('d',8,false);
-        King bK   = new King('e',8,false);
-        Bishop bB2 = new Bishop('f',8,false);
-        Knight bN2 = new Knight('g',8,false);
-        Rook bR2 = new Rook('h',8,false);
+        Rook bR1 = new Rook('a',8,false,this);
+        Knight bN1 = new Knight('b',8,false,this);
+        Bishop bB1 = new Bishop('c',8,false,this);
+        Queen bQ  = new Queen('d',8,false,this);
+        King bK   = new King('e',8,false,this);
+        Bishop bB2 = new Bishop('f',8,false,this);
+        Knight bN2 = new Knight('g',8,false,this);
+        Rook bR2 = new Rook('h',8,false,this);
 
-        Pawn bP1 = new Pawn('a',7,false);
-        Pawn bP2 = new Pawn('b',7,false);
-        Pawn bP3 = new Pawn('c',7,false);
-        Pawn bP4 = new Pawn('d',7,false);
-        Pawn bP5 = new Pawn('e',7,false);
-        Pawn bP6 = new Pawn('f',7,false);
-        Pawn bP7 = new Pawn('g',7,false);
-        Pawn bP8 = new Pawn('h',7,false);
+        Pawn bP1 = new Pawn('a',7,false,this);
+        Pawn bP2 = new Pawn('b',7,false,this);
+        Pawn bP3 = new Pawn('c',7,false,this);
+        Pawn bP4 = new Pawn('d',7,false,this);
+        Pawn bP5 = new Pawn('e',7,false,this);
+        Pawn bP6 = new Pawn('f',7,false,this);
+        Pawn bP7 = new Pawn('g',7,false,this);
+        Pawn bP8 = new Pawn('h',7,false,this);
 
 
     }
     // Finds the current position of the King of the specified color
-    public static int[] findKing(boolean white) {
-        Piece[][] refBoard = getBoard();
+    public int[] findKing(boolean white) {
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
-                Piece p = refBoard[r][c];
+                Piece p = board[r][c];
                 if (p instanceof King && p.getIdentification().isWhite() == white) {
                     return new int[]{r, c};
                 }
@@ -606,11 +614,10 @@ public class ChessBoard extends JPanel {
     }
 
     // Checks if a square is under attack by any piece of the specified color
-    public static boolean isSquareAttacked(int row, int col, boolean attackedByWhite) {
-        Piece[][] refBoard = getBoard();
+    public boolean isSquareAttacked(int row, int col, boolean attackedByWhite) {
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
-                Piece p = refBoard[r][c];
+                Piece p = board[r][c];
                 if (p != null && p.getIdentification().isWhite() == attackedByWhite) {
                     // Pawns capture differently than they move
                     if (p instanceof Pawn) {
@@ -628,12 +635,14 @@ public class ChessBoard extends JPanel {
                             return true;
                         }
                     } else {
-                        p.moveCheck();
-                        int[][] moveSet = p.getMoveSet();
+                        p.moveCheck(this);
+                        int[][] moveSet = p.getMoveSet(this);
                         boolean[] validMoves = p.getValidMoveSetRaw(); // We'll add this method to Piece
-                        for (int i = 0; i < moveSet.length; i++) {
-                            if (validMoves[i] && moveSet[i][0] == row && moveSet[i][1] == col) {
-                                return true;
+                        if (moveSet != null){
+                            for (int i = 0; i < moveSet.length; i++) {
+                                if (validMoves[i] && moveSet[i][0] == row && moveSet[i][1] == col) {
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -643,7 +652,7 @@ public class ChessBoard extends JPanel {
         return false;
     }
 
-    public static boolean isKingInCheck(boolean white) {
+    public boolean isKingInCheck(boolean white) {
         int[] kingPos = findKing(white);
         if (kingPos == null) return false;
         return isSquareAttacked(kingPos[0], kingPos[1], !white);
@@ -678,7 +687,8 @@ public class ChessBoard extends JPanel {
             for (int c = 0; c < 8; c++) {
                 Piece p = refBoard[r][c];
                 if (p != null && p.getIdentification().isWhite() == white) {
-                    boolean[] moves = p.getValidMoveSet();
+                    p.moveCheck(this);
+                    boolean[] moves = p.getValidMoveSet(this);
                     for (boolean canMove : moves) {
                         if (canMove) return true;
                     }
@@ -708,20 +718,68 @@ public class ChessBoard extends JPanel {
         }
     }
 
+    public List<Piece> getCapturedByBlack() {
+        return capturedByBlack;
+    }
+
+    public List<Piece> getCapturedByWhite() {
+        return capturedByWhite;
+    }
+
+    public void setCapturedByBlack(List<Piece> capturedByBlack1) {
+        capturedByBlack = capturedByBlack1;
+    }
+
+    public void setCapturedByWhite(List<Piece> capturedByWhite1) {
+        capturedByWhite = capturedByWhite1;
+    }
+
+    public boolean isWhiteToMove(){
+        return whiteToMove;
+    }
+
+    public void setWhiteToMove(boolean whiteToMove){
+        this.whiteToMove = whiteToMove;
+    }
 
     public static void main (String[]args){
 
         JFrame frame = new JFrame("Chess Board");
         frame.setLayout(new BorderLayout());
 
-        ChessBoard board = new ChessBoard();
+        ChessBoard chessBoard = new ChessBoard();
 
-        frame.add(board, BorderLayout.CENTER);
+        frame.add(chessBoard, BorderLayout.CENTER);
         frame.setResizable(true);
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        //Global.printAllValidMoves(chessBoard);
+
+        MoveGenerator.runPerftUpToDepth(chessBoard,6);
+
+        /*
+        MoveGenerator mg = new MoveGenerator();
+        System.out.println("Number of positions : "+mg.simulateMoves(chessBoard,2,true));
+
+        Global.printAllValidMoves(chessBoard);
+
+        */
+
+        /*
+
+        Global.printArrayList(mg.generateMoves(chessBoard,true));
+
+        System.out.println("----------------------------------------------------------------");
+        Global.printArrayList(mg.generateMoves(chessBoard,false));
+
+        Global.printMoveSet(getBoard()[7][4].getMoveSet());
+        Global.printValidMoveSet(getBoard()[7][4].getValidMoveSet());
+
+         */
+
 
 
     }

@@ -2,6 +2,39 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bd7ea531-22fe-48c1-92fd-5b817fa809a8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChessBoard.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChessBoard/src/engine/Move.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChessBoard/src/engine/MoveGenerator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/Global/Global.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/Main.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/board/ChessBoard$1.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/board/ChessBoard.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/engine/Move.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/engine/MoveGenerator.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/black/black-bishop.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/black/black-king.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/black/black-knight.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/black/black-pawn.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/black/black-queen.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/black/black-rook.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/white/white-bishop.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/white/white-king.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/white/white-knight.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/white/white-pawn.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/white/white-queen.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieceImages/white/white-rook.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Bishop.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/King.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Knight.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Pawn.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Piece.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/PieceIdentification.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Queen.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Rook.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChessBoard/src/Global/Global.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/Global/Global.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChessBoard/src/board/ChessBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/board/ChessBoard.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChessBoard/src/pieces/Bishop.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/pieces/Bishop.java" afterDir="false" />
@@ -38,17 +71,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.ChessBoard.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Kalana Dasanayaka/Documents/GitHub/ChessBoard&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.ChessBoard.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "kDash22",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Kalana Dasanayaka/Documents/GitHub/ChessBoard"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

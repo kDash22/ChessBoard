@@ -1,6 +1,5 @@
 package pieces;
 
-import Global.Global;
 import board.ChessBoard;
 
 public class Bishop extends Piece {
@@ -8,7 +7,7 @@ public class Bishop extends Piece {
     private boolean check = false;
     private static final int PIECE_VALUE = 3;
 
-    public Bishop(Character chessCol, int chessRow, boolean white) {
+    public Bishop(Character chessCol, int chessRow, boolean white,ChessBoard chessBoard) {
         setChessCol(chessCol);
         setChessRow(chessRow);
 
@@ -17,20 +16,30 @@ public class Bishop extends Piece {
         } else {
             setIdentification(PieceIdentification.B_BISHOP);
         }
-        ChessBoard.insertPiece(chessCol, chessRow, this);
+        chessBoard.insertPiece(chessCol, chessRow, this);
     }
 
     @Override
-    public void moveCheck() {
+    public void moveCheck(ChessBoard chessBoard) {
+
+
+        if (chessBoard.isWhiteToMove() != getIdentification().isWhite()){
+            moveSet = null;
+            validMoveSet = null;
+            return;
+        }
+
+
         int col = chessColToIndex(getChessCol());
         int row = Piece.chessRowToIndex(getChessRow());
 
-        Piece[][] refBoard = ChessBoard.getBoard();
+        Piece[][] refBoard = chessBoard.getBoard();
 
         // up to 13 moves on the longest diagonal
         int[][] tempMoveSet = new int[14][2];
         boolean[] tempValidMoveSet = new boolean[14];
         int count = 0;
+        int validMoveCount = 0;//to keep track of valid moves for resizing the moveSet and validMoveSet arrays later
 
         // Directions: {row_change, col_change}
         // Top-Right, Top-Left, Bottom-Right, Bottom-Left
@@ -47,6 +56,7 @@ public class Bishop extends Piece {
                 if (refBoard[toRow][toCol] == null) {
                     tempValidMoveSet[count] = true;
                     count++;
+                    validMoveCount++;
                 } else {
                     // Check if it's an opponent piece
                     if (refBoard[toRow][toCol].getIdentification().isWhite() != getIdentification().isWhite()) {
@@ -54,8 +64,10 @@ public class Bishop extends Piece {
                                 refBoard[toRow][toCol].getIdentification() == PieceIdentification.B_KING) {
                             check = true;
                             tempValidMoveSet[count] = true; // Essential for check detection
+                            validMoveCount++;
                         } else {
                             tempValidMoveSet[count] = true;
+                            validMoveCount++;
                         }
                     } else {
                         tempValidMoveSet[count] = false; // Blocked by own piece
@@ -70,14 +82,19 @@ public class Bishop extends Piece {
         }
 
         // Initialize and correctly size the moveSet and validMoveSet arrays
-        moveSet = new int[count][2];
-        validMoveSet = new boolean[count];
+        moveSet = new int[validMoveCount][2];
+        validMoveSet = new boolean[validMoveCount];
 
         //System.out.println("\nBishop valid move count : "+count+"\n");
+        int j = 0;
+
         for (int i = 0; i < count; i++) {
-            moveSet[i][0] = tempMoveSet[i][0];
-            moveSet[i][1] = tempMoveSet[i][1];
-            validMoveSet[i] = tempValidMoveSet[i];
+            if (tempValidMoveSet[i]) {
+                moveSet[j][0] = tempMoveSet[i][0];
+                moveSet[j][1] = tempMoveSet[i][1];
+                validMoveSet[j] = true;
+                j++;
+            }
         }
 
         //System.out.print("Bishop : ");
@@ -92,7 +109,10 @@ public class Bishop extends Piece {
     }
 
     @Override
-    public String toString() {
-        return "Bishop";
+    public String toString(){
+        if (getIdentification().isWhite())
+            return " wB ";
+        else
+            return " bB ";
     }
 }

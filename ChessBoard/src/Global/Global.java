@@ -1,5 +1,8 @@
 package Global;
 
+import board.ChessBoard;
+import pieces.Piece;
+
 public class Global {
 
     public static void print2D(Object[][] arr) {
@@ -44,4 +47,55 @@ public class Global {
         System.out.println();
     }
 
+    public static void printMoveSet(int[][] moveSet){
+
+        if (moveSet == null){
+            System.out.println("There are no valid moves ! ");
+            return;
+        }
+
+        for (int[] move : moveSet) {
+            char chessCol = Piece.colToChessCol(move[1]);
+            int chessRow = Piece.rowToChessRow(move[0]);
+            System.out.print(chessCol +" "+ chessRow + ", ");
+        }
+        System.out.println("number of moves : "+moveSet.length);
+    }
+
+    public static void printValidMoveSet(boolean[] validMoveSet){
+        for (boolean isValid : validMoveSet) {
+            System.out.print(isValid ? "Valid, " : "Not Valid,");
+        }
+        System.out.println("number of moves : "+validMoveSet.length);
+    }
+
+
+    public static <T> void printArrayList(java.util.ArrayList<T> list) {
+        for (T item : list) {
+            System.out.println(item);
+        }
+        System.out.println("items in List : "+list.size());
+    }
+
+    public static void printAllValidMoves(ChessBoard chessBoard){
+
+        Piece[][] refBoard = chessBoard.getBoard();
+
+        for (int i =0; i<8; i++){
+            for (int j= 0; j<8; j++){
+                if (refBoard[i][j]!=null){
+
+                    if (refBoard[i][j].getIdentification().isWhite() != chessBoard.isWhiteToMove()) continue;
+
+                    refBoard[i][j].moveCheck(chessBoard);
+                    System.out.print(refBoard[i][j]);
+                    Global.printMoveSet(refBoard[i][j].getMoveSet(chessBoard));
+                }
+            }
+        }
+
+    }
+
 }
+
+
