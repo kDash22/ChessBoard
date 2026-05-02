@@ -3,6 +3,9 @@ package engine;
 import pieces.Pawn;
 import pieces.Piece;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Move {
 
     int fromCol, fromRow;
@@ -16,6 +19,8 @@ public class Move {
     //to enable en passant if a pawn is pushed 2 squares
     boolean isDoublePawnPush;
 
+    public List<Piece> resetEnPassantPawns = new ArrayList<>();
+
     public Move(char fromChessCol,int fromChessRow, char toChessCol,int toChessRow, Piece moved, Piece captured) {
 
         fromRow = Piece.chessRowToIndex(fromChessRow);
@@ -26,6 +31,7 @@ public class Move {
         capturedPiece = captured;
 
         pieceHadMoved = moved.hasMoved();
+
 
         isDoublePawnPush = (moved instanceof Pawn) && (Math.abs(toRow - fromRow) == 2);
     }

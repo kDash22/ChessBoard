@@ -2,30 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bd7ea531-22fe-48c1-92fd-5b817fa809a8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChessBoard/src/Global/Global.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/Global/Global.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChessBoard/src/board/ChessBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/board/ChessBoard.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChessBoard/src/engine/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/engine/Move.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChessBoard/src/engine/MoveGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/engine/MoveGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChessBoard/src/pieces/Bishop.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/pieces/Bishop.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChessBoard/src/pieces/King.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/pieces/King.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChessBoard/src/pieces/Knight.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/pieces/Knight.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChessBoard/src/pieces/Pawn.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/pieces/Pawn.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChessBoard/src/pieces/Piece.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/pieces/Piece.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChessBoard/src/pieces/Queen.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/pieces/Queen.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChessBoard/src/pieces/Rook.java" beforeDir="false" afterPath="$PROJECT_DIR$/ChessBoard/src/pieces/Rook.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/Global/Global.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/Global/Global.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/board/ChessBoard.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/board/ChessBoard.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/engine/Move.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/engine/Move.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/engine/MoveGenerator.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/engine/MoveGenerator.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Bishop.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Bishop.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/pieces/King.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/King.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Knight.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Knight.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Pawn.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Pawn.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Piece.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Piece.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Queen.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Queen.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Rook.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/ChessBoard/pieces/Rook.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

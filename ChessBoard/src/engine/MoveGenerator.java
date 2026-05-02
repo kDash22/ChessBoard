@@ -1,6 +1,7 @@
 package engine;
 
 import board.ChessBoard;
+import pieces.King;
 import pieces.Pawn;
 import pieces.Piece;
 
@@ -55,8 +56,20 @@ public class MoveGenerator {
                     char toChessCol = Piece.colToChessCol(c);
                     int toChessRow = Piece.rowToChessRow(r);
 
+                    Piece capturedPiece = refBoard[r][c];
+
+                    if (p instanceof Pawn && c != col && capturedPiece == null) {
+                        capturedPiece = refBoard[row][c];
+                    }
+
                     //board is indexed [row][col]
-                    Move m = new Move(fromChessCol,fromChessRow,toChessCol,toChessRow,p,refBoard[r][c]); //board is indexed with row-col format
+                    Move m = new Move(fromChessCol,fromChessRow,toChessCol,toChessRow,p,capturedPiece); //board is indexed with row-col format
+
+                    //if the pawn was pushed 2 squares
+                    if (p instanceof Pawn && Math.abs(r - row) == 2) {
+                        m.isDoublePawnPush = true;
+                    }
+
                     moves.add(m);
                 }
 
@@ -83,6 +96,12 @@ public class MoveGenerator {
 
         for (Move move : moves){
             makeMove(chessBoard,move);
+
+            if (chessBoard.isKingInCheck(whiteToMove)) {
+                undoMove(chessBoard, move);
+                continue;
+            }
+
             numPositions += simulateMoves(chessBoard,depth-1,!whiteToMove);
             undoMove(chessBoard,move);
         }
@@ -97,20 +116,20 @@ public class MoveGenerator {
     public void makeMove(ChessBoard chessBoard, Move move){
         Piece[][] refBoard = chessBoard.getBoard();
 
-        /*
-        if (refBoard[move.toRow][move.toCol]!= null){
-
-            if (refBoard[move.toRow][move.toCol].getIdentification().isWhite()){
-                List<Piece> capturedByBlack= chessBoard.getCapturedByBlack();
-                capturedByBlack.add(refBoard[move.toRow][move.toCol]);
-                chessBoard.setCapturedByBlack(capturedByBlack);
-            } else {
-                List<Piece> capturedByWhite = chessBoard.getCapturedByWhite();
-                capturedByWhite.add(refBoard[move.toRow][move.toCol]);
-                chessBoard.setCapturedByWhite(capturedByWhite);
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece pp = refBoard[r][c];
+                if (pp instanceof Pawn && pp.getIdentification().isWhite() != chessBoard.isWhiteToMove()) {
+                    Pawn pawn = (Pawn) pp;
+                    if (pawn.isEnPassantVulnerable()) {
+                        pawn.setEnPassantVulnerable(false);
+                        // Save this pawn to our move object so we can restore it during undoMove
+                        move.resetEnPassantPawns.add(pawn);
+                    }
+                }
             }
         }
-        */
+
         refBoard[move.fromRow][move.fromCol] = null; //simulates a move
         refBoard[move.toRow][move.toCol] = move.movedPiece;
 
@@ -120,6 +139,26 @@ public class MoveGenerator {
         //stops the calculation of false castling moves
         move.movedPiece.setHasMoved(true);
 
+        //enPassant move logic, the captured piece must be cleared correctly
+        if (move.movedPiece instanceof Pawn && move.fromCol != move.toCol && refBoard[move.fromRow][move.toCol] == move.capturedPiece) {
+            refBoard[move.fromRow][move.toCol] = null;
+        }
+
+        //castling logic, the rook must move in tandem with the king
+        if (move.movedPiece instanceof King && Math.abs(move.toCol-move.fromCol) == 2){
+            boolean isKingside = move.toCol > move.fromCol;
+            int rookFromCol = isKingside ? 7 : 0;
+            int rookToCol = isKingside ? move.toCol - 1 : move.toCol + 1;
+            Piece rook = refBoard[move.fromRow][rookFromCol];
+
+            refBoard[move.fromRow][rookFromCol] = null; // Clears original square
+            refBoard[move.fromRow][rookToCol] = rook;   // Places on new square
+            if (rook != null) {
+                rook.updateCoords(Piece.colToChessCol(rookToCol), Piece.rowToChessRow(move.fromRow));
+                rook.setHasMoved(true); // Must be true when making the move
+            }
+        }
+
         //the en passant vulnerability must be set for it to be available in the simulation tree
         if (move.isDoublePawnPush){
             ((Pawn)move.movedPiece).setEnPassantVulnerable(true);
@@ -127,24 +166,56 @@ public class MoveGenerator {
         }
 
         chessBoard.setBoard(refBoard);
-        chessBoard.repaint();
+        //chessBoard.repaint();
     }
 
     public void undoMove(ChessBoard chessBoard, Move move){
         Piece[][] refBoard = chessBoard.getBoard();
-
-        //put the captured piece back
-        refBoard[move.toRow][move.toCol] = move.capturedPiece; //undoes a move
-        if (move.capturedPiece != null)
-            move.capturedPiece.updateCoords(
-                    Piece.colToChessCol(move.toCol),
-                    Piece.rowToChessRow(move.toRow));
 
         //put the moved piece back at its original square
         refBoard[move.fromRow][move.fromCol] = move.movedPiece;
         move.movedPiece.updateCoords(
                 Piece.colToChessCol(move.fromCol),
                 Piece.rowToChessRow(move.fromRow));
+
+        //put the captured piece back correctly (Handles En Passant geometry)
+        if (move.movedPiece instanceof Pawn && move.fromCol != move.toCol &&
+                move.capturedPiece != null ) {
+
+
+            int capRow = Piece.chessRowToIndex(move.capturedPiece.getChessRow());
+
+            if (capRow != move.toRow) { // Confirmed En Passant
+                refBoard[move.toRow][move.toCol] = null;
+                refBoard[move.fromRow][move.toCol] = move.capturedPiece;
+            } else { // Standard diagonal capture
+                refBoard[move.toRow][move.toCol] = move.capturedPiece;
+            }
+
+        } else {
+            refBoard[move.toRow][move.toCol] = move.capturedPiece; // Standard capture restore
+        }
+
+        if (move.capturedPiece != null) {
+            move.capturedPiece.updateCoords(
+                    move.capturedPiece.getChessCol(),
+                    move.capturedPiece.getChessRow());
+        }
+
+        //UNDO CASTLING (Missing from your code)
+        if (move.movedPiece instanceof King && Math.abs(move.toCol - move.fromCol) == 2) {
+            boolean isKingside = move.toCol > move.fromCol;
+            int rookFromCol = isKingside ? 7 : 0;
+            int rookToCol = isKingside ? move.toCol - 1 : move.toCol + 1;
+            Piece rook = refBoard[move.fromRow][rookToCol];
+
+            refBoard[move.fromRow][rookToCol] = null;
+            refBoard[move.fromRow][rookFromCol] = rook;
+            if (rook != null) {
+                rook.updateCoords(Piece.colToChessCol(rookFromCol), Piece.rowToChessRow(move.fromRow));
+                rook.setHasMoved(false);
+            }
+        }
 
         //restore the original hasMoved State using the hadMoved state stored in the Move class
         //restores castling rights, after a move is made and undone in the simulation tree
@@ -155,8 +226,12 @@ public class MoveGenerator {
             ((Pawn) move.movedPiece).setEnPassantVulnerable(false);
         }
 
+        for (Piece p : move.resetEnPassantPawns) {
+            ((Pawn) p).setEnPassantVulnerable(true);
+        }
+
         chessBoard.setBoard(refBoard);
-        chessBoard.repaint();
+        //chessBoard.repaint();
     }
 
     //convenient method to print perft(performance test) results

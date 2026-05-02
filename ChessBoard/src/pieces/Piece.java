@@ -112,14 +112,14 @@ public abstract class Piece {
     // A version of getValidMoveSet that doesn't check for King safety to avoid infinite recursion
     public ArrayList<int[]> getValidMoveListRaw(ChessBoard chessBoard) {
         moveCheck(chessBoard);
-        return validMoveList;
+        return new ArrayList<>(validMoveList); // <--- Returns a safe copy
     }
 
     //A version with the check for King safety
     public ArrayList<int[]> getValidMoveList(ChessBoard chessBoard) {
         moveCheck(chessBoard);
         filterCheckMoves(chessBoard);
-        return validMoveList;
+        return new ArrayList<>(validMoveList); // <--- Returns a safe copy
     }
 
     // Validates each move in validMoveSet to ensure it doesn't leave the player's King in check

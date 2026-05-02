@@ -774,6 +774,8 @@ public class ChessBoard extends JPanel {
 
         ChessBoard chessBoard = new ChessBoard();
 
+        MoveGenerator.runPerftUpToDepth(chessBoard,6);
+
         frame.add(chessBoard, BorderLayout.CENTER);
         frame.setResizable(true);
         frame.pack();
@@ -783,7 +785,7 @@ public class ChessBoard extends JPanel {
 
         //Global.printAllValidMoves(chessBoard);
 
-        MoveGenerator.runPerftUpToDepth(chessBoard,6);
+
 
         /*
         MoveGenerator mg = new MoveGenerator();
